@@ -1,7 +1,7 @@
 /* Dashboard: renders the personalized plan from localStorage. */
 (function () {
   var UR = window.UR, ic = UR.icon, cite = UR.cite, esc = UR.esc;
-  var TAG = { earthquake: "Earthquake", pandemic: "Outbreaks", gsl: "Drought & lake", wildfire: "Wildfire", air: "Air quality", flood: "Flood", landslide: "Landslide", radon: "Radon", power: "Power", avalanche: "Avalanche", economic: "Money" };
+  var TAG = { earthquake: "Earthquake", pandemic: "Outbreaks", gsl: "Drought & lake", wildfire: "Wildfire", air: "Air quality", flood: "Flood", landslide: "Landslide", radon: "Radon", power: "Power", avalanche: "Avalanche", economic: "Money", heat: "Heat", fire: "Home fire" };
   var COST = ["Free", "$", "$$", "$$$"];
   function hz(id) { for (var i = 0; i < UR.hazards.length; i++) if (UR.hazards[i].id === id) return UR.hazards[i]; }
   function money(n) { return "$" + Math.round(n).toLocaleString("en-US"); }
@@ -50,6 +50,17 @@
       '<div class="toolbar no-print" style="margin-top:18px"><button class="btn gold small" type="button" data-print>' + ic("print") + ' Print or save as PDF</button><a class="btn small secondary" style="color:#fff;border-color:rgba(255,255,255,.5)" href="start.html">Edit my answers</a><button class="btn small secondary" style="color:#fff;border-color:rgba(255,255,255,.5)" type="button" data-erase>' + ic("trash") + ' Erase my data</button></div>' +
       '</div></section>';
 
+    // ---------- first hour (free steps; ids shared with the checklist where they match)
+    var fh = UR.firstHour(p), fhIds = fh.map(function (s) { return s.id; });
+    var fhMins = fh.reduce(function (a, s) { return a + s.mins; }, 0);
+    html += '<section class="dash-section" id="first-hour"><div class="wrap"><div class="card first-hour">' +
+      '<h2>' + ic("clock") + ' Start here: your first hour</h2>' +
+      '<p class="muted small">' + fh.length + ' free steps, about ' + fhMins + ' minutes in all <span class="est">(estimate)</span>. Each one protects you right away.</p>' +
+      '<ol class="checklist fh-list">' + fh.map(function (s) {
+        return '<li data-id="' + s.id + '"' + (checks[s.id] ? ' class="done"' : "") + '><label><input type="checkbox" data-check="' + s.id + '"' + (checks[s.id] ? " checked" : "") + '><span class="nm">' + esc(s.name) + '</span></label>' +
+          '<div class="meta"><span class="tag free">Free</span><span class="tag">' + s.mins + ' min</span></div><div class="det">' + cite(s.detail) + '</div></li>';
+      }).join("") + '</ol><p class="small" data-fh-progress style="margin:10px 0 0"></p></div></div></section>';
+
     // ---------- priorities
     var order = sel.slice().sort(function (a, b) { return pr[b].band - pr[a].band || sel.indexOf(a) - sel.indexOf(b); });
     html += '<section class="dash-section" id="priorities"><div class="wrap"><h2>' + ic("shield") + ' What matters most for you</h2>' +
@@ -59,6 +70,10 @@
         return '<details class="prio"><summary><span class="hz-icon" style="background:' + x.color + '">' + ic(x.icon) + '</span><span class="nm">' + esc(x.name) + '</span><span class="band band-' + r.band + '">' + UR.BANDS[r.band] + '</span></summary><div class="why"><ul>' +
           r.reasons.map(function (s) { return "<li>" + cite(s) + "</li>"; }).join("") + '</ul><p style="margin:8px 0 0"><a href="hazards/' + id + '.html">Read the ' + esc(x.name.toLowerCase()) + ' guide</a></p></div></details>';
       }).join("") + '</div></div></section>';
+
+    // ---------- county alerts
+    if (UR.alertsCard) html += '<section class="dash-section" id="alerts"><div class="wrap"><h2>' + ic("bell") + ' Alerts for ' + esc(p.county) + ' County</h2>' +
+      '<p class="muted small">Local alerts in Utah are mostly opt-in: signing up is how evacuation orders reach you. Do this once for every adult at home.</p>' + UR.alertsCard(p.county) + '</div></section>';
 
     // ---------- buy first / free first (re-rendered on change)
     html += '<section class="dash-section" id="first"><div class="wrap"><h2>' + ic("list") + ' Where to start</h2><div class="grid two">' +
@@ -94,7 +109,6 @@
 
     // ---------- additions
     var adds = UR.additions(p);
-    if (p.selfEmployed) adds.push({ id: "income", title: "Irregular income", icon: "coin", items: ["Aim for a larger emergency fund than salaried households, since income can stop without notice. A common starting goal is a small buffer, then several months of expenses (general guidance). [[cfpb-fund]]"] });
     if (adds.length) html += '<section class="dash-section" id="household"><div class="wrap"><h2>' + ic("home") + ' Just for your household</h2><p class="muted small">Based on your answers about health, home, family, and resources.</p><div class="add-grid">' +
       adds.map(function (a) { return '<div class="card add-card" data-add="' + a.id + '"><h3>' + ic(a.icon) + esc(a.title) + '</h3><ul>' + a.items.map(function (s) { return "<li>" + cite(s) + "</li>"; }).join("") + '</ul></div>'; }).join("") + '</div></div></section>';
 
@@ -107,7 +121,7 @@
           '<div class="card"><h3><span class="num">1</span> Before</h3>' + ul(x.before) + '</div>' +
           '<div class="card"><h3><span class="num" style="background:var(--rock)">2</span> During</h3>' + ul(x.during) + '</div>' +
           '<div class="card"><h3><span class="num" style="background:var(--sage-dark)">3</span> After</h3>' + ul(x.after) + '</div></div>' +
-          '<p class="small" style="margin:12px 0 0"><strong>Live conditions:</strong> ' + x.live.map(function (l) { return '<a href="' + esc(UR.sources[l.src].url) + '" target="_blank" rel="noopener">' + esc(l.label) + '</a>'; }).join(" &middot; ") + ' &middot; <a href="hazards/' + id + '.html">Full guide</a></p></div></details>';
+          '<p class="small" style="margin:12px 0 0"><strong>' + esc(x.liveTitle || "Live conditions") + ':</strong> ' + x.live.map(function (l) { return '<a href="' + esc(UR.sources[l.src].url) + '" target="_blank" rel="noopener">' + esc(l.label) + '</a>'; }).join(" &middot; ") + ' &middot; <a href="hazards/' + id + '.html">Full guide</a></p></div></details>';
       }).join("") + '</div></section>';
 
     html += '<section class="dash-section"><div class="wrap"><div class="note warm small">This plan is general education based on your answers, not medical, engineering, or legal advice. Quantities marked <em>(estimate)</em> are planning guesses. <strong>In an emergency, call 911.</strong></div></div></section>';
@@ -126,7 +140,11 @@
         rootEl.querySelector('[data-tier-mini="' + t.n + '"]').textContent = tp + "%";
       });
       function li(it) { return '<li><span><strong>' + it.name + '</strong> <span class="tag ' + (it.cost ? "cost" : "free") + '">' + COST[it.cost] + '</span><br><span class="small muted">' + esc(UR.TIERS[it.tier - 1].short) + ' list &middot; ' + esc(it.cat) + '</span></span></li>'; }
-      var b = UR.buyFirst(p, cl, checks), f = UR.freeFirst(p, cl, checks);
+      var b = UR.buyFirst(p, cl, checks), f = UR.freeFirst(p, cl, checks, fhIds);
+      var fd = fhIds.filter(function (id) { return checks[id]; }).length;
+      rootEl.querySelector("[data-fh-progress]").innerHTML = fd === fh.length
+        ? "<strong>First hour done.</strong> Next up: <a href=\"#checklist\">your 7-day checklist</a>."
+        : fd + " of " + fh.length + " done";
       rootEl.querySelector("[data-buy]").innerHTML = b.length ? b.map(li).join("") : '<li><span>All of your first items are done. Nice work.</span></li>';
       rootEl.querySelector("[data-free]").innerHTML = f.length ? f.map(li).join("") : '<li><span>All free steps done.</span></li>';
     }
@@ -135,6 +153,7 @@
       if (e.target.checked) checks[id] = true; else delete checks[id];
       UR.store.set("ur.checks", checks);
       rootEl.querySelectorAll('li[data-id="' + id + '"]').forEach(function (l) { l.classList.toggle("done", e.target.checked); });
+      rootEl.querySelectorAll('[data-check="' + id + '"]').forEach(function (c) { c.checked = e.target.checked; });
       refresh();
     });
     var tabs = [].slice.call(rootEl.querySelectorAll('[role="tab"]'));

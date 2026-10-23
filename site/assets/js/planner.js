@@ -87,7 +87,14 @@
     out.pandemic = { band: 2, reasons: ["Outbreaks happen statewide every year (flu, measles, West Nile). [[dhhs-dash]]"] };
     out.radon = { band: 2, reasons: ["About 1 in 3 Utah homes have elevated radon; only a test tells you yours. [[deq-radon]]"] };
     out.economic = { band: 2, reasons: ["Income shocks and price spikes affect every household. [[bls-2020]]"] };
-    var f = c.f, s = p.setting;
+    var f = c.f, s = p.setting, work = p.work || {};
+    // Extreme heat: hottest in the southwest desert, then the low valleys where most people live.
+    if (p.county === "Washington") out.heat = { band: 3, reasons: ["Your county holds Utah's record high: 117&deg;F at St. George. [[ncei-ut-117]]"] };
+    else if (has(f, "south") || has(f, "desert")) out.heat = { band: 2, reasons: ["Southern Utah's parks had record-hot summers in 2026. [[kuer-heat-2026]]"] };
+    else if (has(f, "valley") || has(f, "wasatch")) out.heat = { band: 2, reasons: ["Salt Lake City hit 109&deg;F in July 2026, and Logan and Ogden reached 106&deg;F. [[dn-slc-109]]"] };
+    else out.heat = { band: 1, reasons: ["Heat waves can reach every county, and 2026 set records across Utah. [[kuer-heat-2026]]"] };
+    // Home fire: the same everywhere; the household decides how serious it is.
+    out.fire = { band: 2, reasons: ["Home fires are the disaster the Red Cross responds to most often. [[redcross-disasters]]", "Utah's fire death rate is below the national rate, but 26 Utahns died in fires in 2023. [[usfa-states]]"] };
 
     // county reasons
     var R = out;
@@ -137,6 +144,14 @@
       bump("pandemic", 1, "Lung and heart conditions raise the stakes of respiratory illness.");
     }
     if (med.pregnancy || (+p.infants > 0) || (+p.seniors > 0)) bump("pandemic", 1, "Infants, pregnant people, and older adults are more vulnerable to some outbreaks (e.g., measles in infants). [[dhhs-measles]]");
+    if (p.cooling === "none") bump("heat", 1, "You don't have air conditioning, one of the CDC's main heat risk factors. [[cdc-heat-risk]]");
+    if (med.pregnancy || med.lungHeart || (+p.infants > 0) || (+p.seniors > 0)) bump("heat", 1, "Someone at home is at higher risk from heat: an older adult, a baby, a pregnancy, or a chronic condition. [[cdc-heat-risk]]");
+    if (work.outdoor) bump("heat", 1, "You work outdoors, where heat illness is a known risk. [[cdc-heat-risk]]");
+    if (work.outdoor) bump("air", 1, "You work outdoors, where wildfire smoke and bad-air days hit hardest. [[niosh-smoke]]");
+    if ((work.hourly || p.selfEmployed) && p.budget !== "tight") bump("economic", 1, "Your income could stop during a disaster or outbreak, so a cash buffer matters more. [[cfpb-guide]]");
+    if (+p.seniors > 0) bump("fire", 1, "People 65 and older are 2.5 times as likely to die in a home fire. [[usfa-older]]");
+    else if (med.mobility) bump("fire", 1, "Someone at home needs extra time or help to get out, and a fire may leave only a minute or two. [[nfpa-escape]]");
+    if (med.powered) R.heat.reasons.push("Heat can cause power outages, so your powered medical equipment needs a hot-weather plan too. [[cdc-heat-about]]");
     if (med.powered) bump("power", 1, "You rely on powered medical equipment, so outages are a health issue, not just an inconvenience. [[ready-power]]");
     if (p.homeType === "mobile") bump("power", 1, "Manufactured homes can lose heat quickly in winter outages (general guidance).");
     if (p.brick === "yes" || p.brick === "unsure") {
@@ -161,7 +176,7 @@
     { n: 3, id: "t30", label: "30 days", short: "30 days", days: 30, blurb: "A month of everyday living, built gradually as space and budget allow." },
     { n: 4, id: "t90", label: "90 days", short: "90 days", days: 90, blurb: "A three-month supply of foods you eat, plus the ability to treat more water. [[church-storage]]" }
   ];
-  UR.CATS = ["Water", "Food", "Health & medicine", "Sanitation & hygiene", "Power, light & communication", "Warmth & shelter", "Safety & tools", "Air quality", "Home protection", "Documents & money", "Kids & family", "Pets & animals", "Backcountry"];
+  UR.CATS = ["Water", "Food", "Health & medicine", "Sanitation & hygiene", "Power, light & communication", "Warmth & shelter", "Cooling", "Safety & tools", "Air quality", "Home protection", "Documents & money", "Kids & family", "Pets & animals", "Backcountry"];
 
   var ALL = ["all"];
   var LUNG = ["pandemic", "wildfire", "air", "gsl"];
@@ -195,7 +210,8 @@
         else if (tier === 2) s += "Two weeks of normal meals from your pantry, rotated. [[usu-food]]";
         else if (tier === 3) s += "A month of everyday pantry foods. Store between 32&deg;F and 70&deg;F; cooler keeps quality longer. [[usu-food]]";
         else s += "A three-month supply of everyday foods, then long-term staples (wheat, rice, beans, oats). [[church-storage]] [[church-hsc]]";
-        if (p.diet && (p.diet.allergy || p.diet.celiac)) s += " Store only foods everyone in your home can safely eat, and check labels when you rotate.";
+        var d = p.diet || {};
+        if (d.allergy || d.celiac || d.other) s += " Store only foods everyone in your home can safely eat, and check labels when you rotate (see Dietary needs below).";
         return s;
       }
     };
@@ -204,7 +220,8 @@
   UR.items = [
     // ---------------- Tier 1: 72 hours to 7 days
     { id: "plan-family", tier: 1, cat: "Kids & family", hz: ALL, cost: 0, pri: 9, kind: "do", name: "Make a family emergency plan: meeting places, an out-of-area contact, and who picks up whom", detail: "Write it down and practice it. [[ready-plan]] [[br-plan]]" },
-    { id: "alerts", tier: 1, cat: "Power, light & communication", hz: ALL, cost: 0, pri: 9, kind: "do", name: "Turn on emergency alerts on every phone and sign up for county alerts", detail: "Have several ways to receive alerts. [[ready-fire]]" },
+    { id: "alerts", tier: 1, cat: "Power, light & communication", hz: ALL, cost: 0, pri: 9, kind: "do", name: "Turn on emergency alerts on every phone and sign up for county alerts",
+      detail: function (p) { var c = UR.countyAlerts && UR.countyAlerts[p.county]; return (c && !c.none ? "In " + p.county + " County, that's " + c.name + "; the link is under <a href=\"#alerts\">Alerts for your county</a>. " : "") + "Local alerts are opt-in, so sign up every adult. [[dem-be-informed]] [[ready-fire]]"; } },
     waterItem(1, 7),
     foodItem(1, 7),
     { id: "can-opener", tier: 1, cat: "Food", hz: ALL, cost: 1, pri: 6, kind: "buy", name: "Manual can opener", detail: "[[ready-kit]]" },
@@ -214,8 +231,13 @@
     { id: "radio", tier: 1, cat: "Power, light & communication", hz: ALL, cost: 1, pri: 7, kind: "buy", name: "Battery or hand-crank radio (NOAA Weather Radio if possible)", detail: "[[ready-kit]] [[br-fire]]" },
     { id: "power-bank", tier: 1, cat: "Power, light & communication", hz: ALL, cost: 1, pri: 8, kind: "buy",
       name: function (p) { return pl(UR.household(p).grownups, "phone power bank") + ", kept charged"; }, detail: "[[ready-power]]" },
-    { id: "alarms", tier: 1, cat: "Safety & tools", hz: ALL, cost: 1, pri: 9, kind: "do", name: "Test smoke alarms and install a carbon monoxide alarm with battery backup", detail: "[[ready-winter]]" },
-    { id: "extinguisher", tier: 1, cat: "Safety & tools", hz: ["earthquake", "wildfire", "power"], cost: 1, pri: 6, kind: "buy", name: "Fire extinguisher (know how to use it)", detail: "[[redcross-kit]]" },
+    { id: "alarms", tier: 1, cat: "Safety & tools", hz: ALL, cost: 1, pri: 9, kind: "do", name: "Test smoke alarms and install a carbon monoxide alarm with battery backup", detail: "Test smoke alarms monthly and replace them every 10 years. [[usfa-alarms]] [[ready-winter]]" },
+    { id: "smoke-every", tier: 1, cat: "Safety & tools", hz: ["fire"], cost: 1, pri: 9, kind: "buy",
+      name: function (p) { return p.tenure === "rent" ? "Make sure there's a smoke alarm in every bedroom, outside each sleeping area, and on every level (ask your landlord)" : "Smoke alarms in every bedroom, outside each sleeping area, and on every level"; },
+      detail: function (p) { return "Interconnected alarms all sound when one does. [[nfpa-alarms]]" + (p.budget === "tight" ? " Money tight? The Red Cross installs up to three free alarms in Utah homes. [[redcross-ut-hfc]]" : ""); } },
+    { id: "fire-escape", tier: 1, cat: "Safety & tools", hz: ["fire"], cost: 0, pri: 8, kind: "do", name: "Make a fire escape plan: two ways out of every room and a meeting place outside; practice it twice a year", detail: "You may have only a minute or two after the alarm sounds. [[nfpa-escape]]" },
+    { id: "close-door", tier: 1, cat: "Safety & tools", hz: ["fire"], cost: 0, pri: 6, kind: "do", name: "Sleep with bedroom doors closed", detail: "In fire tests, closed rooms stayed under 100&deg;F while open rooms topped 1,000&deg;F. [[fsri-close]]" },
+    { id: "extinguisher", tier: 1, cat: "Safety & tools", hz: ["fire", "earthquake", "wildfire", "power"], cost: 1, pri: 6, kind: "buy", name: "Fire extinguisher, and learn PASS: Pull, Aim low, Squeeze, Sweep", detail: "Use it only on a small, contained fire with a clear way out. [[usfa-extinguisher]] [[redcross-kit]]" },
     { id: "whistle", tier: 1, cat: "Safety & tools", hz: ["earthquake", "landslide", "avalanche"], cost: 1, pri: 5, kind: "buy", name: "A whistle per person, to signal for help", detail: "If trapped, use a whistle instead of shouting. [[ready-quake]]" },
     { id: "bed-kit", tier: 1, cat: "Safety & tools", hz: ["earthquake"], cost: 1, pri: 7, kind: "buy",
       name: function (p) { return "Sturdy shoes, gloves, and a flashlight by each bed (" + UR.household(p).people + ")"; }, detail: "Broken glass is common after shaking. [[ready-quake]]" },
@@ -237,13 +259,21 @@
     { id: "cash-small", tier: 1, cat: "Documents & money", hz: ["economic", "power", "earthquake"], cost: 1, pri: 6, kind: "buy", name: "Some cash in small bills", detail: "Card readers and ATMs may not work in an outage. [[br-power]]" },
     { id: "blankets", tier: 1, cat: "Warmth & shelter", hz: ["power", "earthquake"], cost: 1, pri: 6, kind: "buy",
       name: function (p) { return (UR.household(p).people === 1 ? "Warm layers and a blanket or sleeping bag" : "Warm layers and a blanket or sleeping bag for each of " + UR.household(p).people + " people"); }, detail: "[[br-power]] [[ready-winter]]" },
-    { id: "car-kit", tier: 1, cat: "Warmth & shelter", hz: ["power", "wildfire", "avalanche"], cost: 1, pri: 5, kind: "buy", when: function (p) { return p.car !== "no"; }, name: "Winter car emergency kit; keep the fuel tank at least half full", detail: "[[br-severe]] [[br-fire]]" },
+    { id: "car-kit", tier: 1, cat: "Warmth & shelter", hz: ["power", "wildfire", "avalanche"], cost: 1, pri: 5, kind: "buy", when: function (p) { return p.car !== "no"; }, name: "Winter car emergency kit; keep the fuel tank at least half full", detail: "[[ready-winter]] [[br-fire]]" },
     { id: "radon-test", tier: 1, cat: "Home protection", hz: ["radon"], cost: 1, pri: 7, kind: "buy", name: function (p) { return p.tenure === "rent" ? "Ask whether your unit has been radon-tested, or test it yourself with a low-cost kit" : "Test your home for radon with a low-cost kit"; }, detail: "Mitigate at 4 pCi/L or higher. [[deq-radon]]" },
-    { id: "drill", tier: 1, cat: "Kids & family", hz: ["earthquake"], cost: 0, pri: 7, kind: "do", name: "Practice Drop, Cover, and Hold On with everyone at home", detail: "Utah drills every April in the Great Utah ShakeOut. [[br-quake]] [[ready-quake]]" },
+    { id: "drill", tier: 1, cat: "Kids & family", hz: ["earthquake"], cost: 0, pri: 7, kind: "do", name: "Practice Drop, Cover, and Hold On with everyone at home", detail: "Join the Great Utah ShakeOut, or register a household drill for any day. [[shakeout-ut]] [[ready-quake]]" },
     { id: "hazard-map", tier: 1, cat: "Home protection", hz: ["earthquake", "landslide", "flood"], cost: 0, pri: 6, kind: "do", name: "Look up your address on the hazard maps", detail: "FaultLine Utah's Know Your Ground for earthquake hazards, the UGS Geologic Hazards Portal for landslides, and the flood maps. [[fl-ground]] [[ugs-portal]] [[br-flood]]" },
     { id: "evac-routes", tier: 1, cat: "Safety & tools", hz: ["wildfire", "flood", "landslide"], cost: 0, pri: 7, kind: "do",
       name: function (p) { return p.car === "no" ? "Plan how you'll evacuate without a car: who will drive you, and when to leave early" : "Plan two evacuation routes in different directions and where you'd go"; }, detail: "[[br-fire]] [[ready-fire]]" },
     { id: "air-bookmark", tier: 1, cat: "Air quality", hz: ["air", "wildfire", "gsl"], cost: 0, pri: 5, kind: "do", name: "Bookmark air.utah.gov and the AirNow Fire and Smoke Map", detail: "[[air-utah]] [[airnow-map]]" },
+    { id: "cool-place", tier: 1, cat: "Cooling", hz: ["heat"], cost: 0, pri: 8, kind: "do",
+      name: function (p) { return p.county === "Salt Lake" ? "Find your nearest Cool Zone, plus a backup place with air conditioning" : "Pick a cool place to go on dangerous heat days: a library, a cooling center, or a friend with AC"; },
+      detail: "Anywhere in Utah, dial 2-1-1 or text your ZIP code to 801-845-2211 for cooling help. [[utah-211]] [[slco-coolzones]]" },
+    { id: "heatrisk", tier: 1, cat: "Cooling", hz: ["heat"], cost: 0, pri: 5, kind: "do", name: "Bookmark the NWS HeatRisk forecast and check it on hot days", detail: "[[nws-heatrisk]]" },
+    { id: "heat-checkin", tier: 1, cat: "Cooling", hz: ["heat"], cost: 0, pri: 6, kind: "do", name: "Agree on hot-day check-ins with relatives or neighbors who live alone", detail: "[[cdc-heat-about]]" },
+    { id: "heat-meds", tier: 1, cat: "Health & medicine", hz: ["heat"], cost: 0, pri: 6, kind: "do", when: rx, name: "Ask your pharmacist whether any of your medicines raise your heat risk", detail: "Some blood pressure, depression, and ADHD medicines do. [[cdc-heat-meds]]" },
+    { id: "hot-car", tier: 1, cat: "Kids & family", hz: ["heat"], cost: 0, pri: 8, kind: "do", when: function (p) { return p.car !== "no" && ((+p.children || 0) + (+p.infants || 0) > 0 || UR.household(p).pets > 0); },
+      name: "Look before you lock: make a habit of checking the back seat every time you leave the car", detail: "A child's body heats up 3 to 5 times faster than an adult's. Never leave a child or pet in a parked car. [[nhtsa-heatstroke]]" },
     { id: "water-sources", tier: 1, cat: "Water", hz: ["gsl"], cost: 0, pri: 4, kind: "do", name: "Follow your city's watering schedule and the Weekly Lawn Watering Guide", detail: "[[slowtheflow]]" },
 
     // ---------------- Tier 2: 14 days
@@ -274,6 +304,7 @@
     { id: "cooler", tier: 2, cat: "Health & medicine", hz: ["power", "earthquake"], cost: 1, pri: 6, kind: "buy", when: function (p) { return p.med && p.med.refrigerated; }, name: "A cooler and ice plan for refrigerated medicine, plus a fridge thermometer", detail: "Ask your pharmacist how long each medicine is safe at room temperature. [[ready-power]]" },
     { id: "slope-drain", tier: 2, cat: "Home protection", hz: ["landslide"], cost: 1, pri: 4, kind: "do", when: function (p) { return p.tenure === "own" && (p.setting === "foothill" || p.setting === "canyon"); }, name: "Direct downspouts and driveway runoff away from slopes", detail: "[[br-land]]" },
     { id: "aerator", tier: 2, cat: "Water", hz: ["gsl"], cost: 1, pri: 3, kind: "buy", name: "Low-flow faucet aerators and a WaterSense showerhead", detail: "[[br-drought]] [[slowtheflow]]" },
+    { id: "room-thermo", tier: 2, cat: "Cooling", hz: ["heat"], cost: 1, pri: 4, kind: "buy", when: function (p) { return p.cooling !== "central"; }, name: "A room thermometer for where you sleep", detail: "Fans stop helping once it's 90&deg;F or hotter indoors; that's your cue to go somewhere cooler. [[cdc-heat-about]]" },
     { id: "pipes", tier: 2, cat: "Warmth & shelter", hz: ["power"], cost: 1, pri: 4, kind: "do", name: "Insulate exposed pipes; know how to let faucets drip in a freeze", detail: "[[br-power]]" },
 
     // ---------------- Tier 3: 30 days
@@ -307,6 +338,13 @@
     { id: "rmp-medcert", tier: 1, cat: "Health & medicine", hz: ["power"], cost: 0, pri: 9, kind: "do", when: function (p) { return p.med && p.med.powered; }, name: "Ask Rocky Mountain Power about its Medical Certificate program (if they're your utility)", detail: "A qualified medical professional completes the application. [[rmp-afn]]" },
     { id: "mobility-plan", tier: 1, cat: "Kids & family", hz: ALL, cost: 0, pri: 8, kind: "do", when: function (p) { return p.med && p.med.mobility; }, name: "Set up a buddy who can help you evacuate, and keep mobility aids by your bed", detail: "If you use a walker or wheelchair during an earthquake, lock your wheels and cover your head and neck. [[ready-quake]] [[ready-disab]]" },
     { id: "asthma-plan", tier: 1, cat: "Health & medicine", hz: LUNG, cost: 0, pri: 8, kind: "do", when: function (p) { return p.med && p.med.lungHeart; }, name: "Ask your clinician for a written action plan for smoke, dust, and inversion days", detail: "[[air-utah]] [[epa-filtration]]" },
+    { id: "diab-supplies", crit: true, tier: 1, cat: "Health & medicine", hz: ALL, cost: 2, pri: 10, kind: "buy", when: function (p) { return p.diet && p.diet.diabetes; }, name: "Two weeks of diabetes supplies, plus glucose tablets or other fast sugar for lows", detail: "Meter, strips, lancets, pump sets, glucagon, ketone strips, and spare batteries in a waterproof container. [[cdc-diabetes-em]]" },
+    { id: "kidney-bin", crit: true, tier: 1, cat: "Food", hz: ALL, cost: 1, pri: 10, kind: "buy", when: function (p) { return p.diet && p.diet.kidney; }, name: "A 3-day emergency kidney diet bin, reviewed with your dietitian", detail: "Start the emergency diet as soon as you might miss dialysis. [[kcer-3day]] [[nkf-emergency]]" },
+    { id: "tube-supply", crit: true, tier: 1, cat: "Health & medicine", hz: ALL, cost: 2, pri: 10, kind: "buy", when: function (p) { return p.diet && p.diet.tube; }, name: "At least 7 days of tube-feeding formula and supplies, plus gravity bags in case the pump loses power", detail: "[[kent-enteral]] [[mskcc-gravity]]" },
+    { id: "epi-2", crit: true, tier: 1, cat: "Health & medicine", hz: ALL, cost: 1, pri: 10, kind: "do", when: function (p) { return p.diet && p.diet.allergy; }, name: "Two epinephrine devices (if prescribed) and your allergy action plan in your go-bag", detail: "Check expiration dates when you rotate supplies. [[faact-prep]]" },
+    { id: "uta-alerts", tier: 1, cat: "Power, light & communication", hz: ALL, cost: 0, pri: 5, kind: "do", when: function (p) { return p.work && p.work.transit; }, name: "Sign up for UTA service alerts (old subscriptions end Nov. 1, 2026)", detail: "[[uta-alerts]]" },
+    { id: "care-backup", tier: 1, cat: "Kids & family", hz: ALL, cost: 0, pri: 8, kind: "do", when: function (p) { return p.work && p.work.essential && ((+p.children || 0) + (+p.infants || 0) + (+p.seniors || 0) > 0 || UR.household(p).pets > 0); }, name: "Line up backup care for kids, older relatives, and pets in case you're called in", detail: "[[ready-locations]]" },
+    { id: "work-kit", tier: 2, cat: "Safety & tools", hz: ALL, cost: 1, pri: 5, kind: "buy", when: function (p) { return p.work && (p.work.commute || p.work.transit || p.work.essential); }, name: "A small kit at work: water, snacks, medicines, walking shoes, and a phone charger", detail: "Enough to stay 24 hours if roads or transit close. [[ready-kit]]" },
     { id: "formula", crit: true, tier: 1, cat: "Kids & family", hz: ALL, cost: 2, pri: 10, kind: "buy", when: function (p) { return p.diet && p.diet.formula; }, name: "At least 7 days of infant formula (ready-to-feed needs no water), bottles, and diapers", detail: "The 2022 formula shortage showed the value of a buffer; ask your pediatrician about alternatives. [[ready-kids]]" },
     { id: "kids-kit", tier: 1, cat: "Kids & family", hz: ALL, cost: 1, pri: 6, kind: "buy", when: function (p) { return (+p.children || 0) + (+p.infants || 0) > 0; }, name: "Comfort items, snacks, and an activity kit for the kids", detail: "[[ready-kids]]" },
     { id: "school-plan", tier: 1, cat: "Kids & family", hz: ALL, cost: 0, pri: 7, kind: "do", when: function (p) { return (+p.children || 0) > 0; }, name: "Learn each school's emergency release plan and update who's allowed to pick up", detail: "[[ready-kids]]" },
@@ -359,10 +397,39 @@
     pool.sort(function (a, b) { return b._score - a._score; });
     return pool.slice(0, 10);
   };
-  UR.freeFirst = function (p, checklist, done) {
-    done = done || {};
-    return checklist[1].concat(checklist[2]).filter(function (i) { return i.cost === 0 && !done[i.id]; })
+  UR.freeFirst = function (p, checklist, done, skip) {
+    done = done || {}; skip = skip || [];
+    return checklist[1].concat(checklist[2]).filter(function (i) { return i.cost === 0 && !done[i.id] && skip.indexOf(i.id) === -1; })
       .sort(function (a, b) { return b.pri - a.pri; }).slice(0, 6);
+  };
+
+  // ---------------------------------------------------------------- first hour
+  // Six or seven free steps that fit in about an hour, for people who don't know where to start.
+  // Steps that match a checklist item share its id, so checking one checks both. Minutes are estimates.
+  UR.firstHour = function (p) {
+    var h = UR.household(p), sel = p.hazards && p.hazards.length ? p.hazards : UR.hazards.map(function (x) { return x.id; });
+    var pr = UR.priorities(p), on = function (id) { return sel.indexOf(id) !== -1; };
+    var bottles = Math.ceil(h.people * 3 / 0.528);  // 3 days at 1 gal/person/day; a 2-liter bottle holds about 0.53 gal
+    var steps = [
+      { id: "alerts", mins: 10, name: "Turn on emergency alerts on your phone and sign up for your county's alerts",
+        detail: "Your county's sign-up link is in <a href=\"#alerts\">Alerts for your county</a>, below." },
+      { id: "plan-family", mins: 15, name: "Pick two meeting places and an out-of-area contact, then text them to everyone at home",
+        detail: "One place near home and one outside your neighborhood. [[ready-plan]] [[br-plan]]" },
+      { id: "fh-smoke", mins: 5, name: "Press the test button on every smoke alarm", detail: "Replace any that don't sound, or that are more than 10 years old. [[usfa-alarms]]" },
+      { id: "shutoffs", mins: 10, name: p.tenure === "rent" ? "Ask your landlord where the gas, water, and electric shutoffs are" : "Find your gas, water, and electric shutoffs",
+        detail: "Know where each one is before you need it. [[br-fire]]" },
+      { id: "fh-water", mins: 10, name: "Start your water supply: fill clean bottles or jugs with tap water",
+        detail: "Three days for " + pl(h.people, "person", "people") + " is " + (h.people * 3) + " gallons at 1 gallon each per day, about " + bottles + " two-liter bottles. Start with what you have; it's free. [[br-water]]" }
+    ];
+    var extra = [];
+    if (p.med && p.med.rx) extra.push({ id: "rx-list", mins: 10, name: "Write a one-page medication list and photograph it", detail: "Drug, dose, prescriber, pharmacy, and Rx number. [[ready-disab]]" });
+    if (on("wildfire") && pr.wildfire.band >= 2 || on("flood") && pr.flood.band >= 3) extra.push({ id: "evac-routes", mins: 10, name: "Pick two ways out of your neighborhood and a place to go", detail: "[[ready-fire]]" });
+    if (on("earthquake")) extra.push({ id: "drill", mins: 5, name: "Practice Drop, Cover, and Hold On with everyone at home", detail: "[[ready-quake]]" });
+    if (h.pets) extra.push({ id: "fh-pets", mins: 5, name: "Put a leash or carrier by the door and take a photo of you with each pet", detail: "The photo helps prove ownership if you're separated. [[ready-pets]]" });
+    // Add personal steps while the whole list still fits in an hour.
+    var total = steps.reduce(function (a, s) { return a + s.mins; }, 0);
+    extra.forEach(function (s) { if (total + s.mins <= 60) { steps.push(s); total += s.mins; } });
+    return steps;
   };
 
   // Rough cost ranges per tier for ONE adult, from the HiveWatch Utah plan (ALL ESTIMATES).
@@ -415,12 +482,113 @@
       "Ready-to-feed formula needs no water, which helps if your water is unsafe. Ask your pediatrician about safe alternatives in a shortage.",
       "If you mix powdered formula, keep treated or bottled water set aside just for the baby. [[cdc-water]]"
     ], "bottle");
-    if (diet.allergy || diet.celiac || diet.other) add("diet", "Dietary needs", [
-      "Tailor stored foods to what everyone can safely eat, read labels, and rotate accordingly.",
-      diet.allergy ? "Food allergies: keep extra epinephrine auto-injectors (if prescribed) with your medication supply, and check expiration dates when you rotate." : null,
-      diet.celiac ? "Celiac disease: store certified gluten-free staples you already use, and keep them separate from shared bulk staples." : null,
-      "Emergency food handouts may not fit your needs, so your own storage matters more."
-    ], "bowl");
+    // Diets: a short, sourced list per need, in the order people are most likely to need it.
+    var picked = UR.DIETS.filter(function (d) { return diet[d.id]; }).map(function (d) { return d.id; });
+    var allergens = UR.ALLERGENS.filter(function (x) { return diet.allergens && diet.allergens[x.id]; }).map(function (x) { return x.label.toLowerCase(); });
+    var note = String(diet.otherText || "").trim();
+    if (diet.allergy || diet.celiac || picked.length || note) {
+      var T = {
+        allergy: [
+          "Keep at least two epinephrine devices (if prescribed) in your go-bag, with your Food Allergy Action Plan. [[faact-prep]]",
+          allergens.length ? "Foods to avoid: " + allergens.join(", ") + ". Recheck every label when you rotate stored food." : null,
+          "Store at least 72 hours of safe food that needs no cooking or heating, and 7 to 10 days when a disaster is on the way. [[fare-prep]]",
+          "Shelters aren't always equipped for special diets. Tell staff about the allergy, and ask for help keeping labeled epinephrine somewhere safe and unlocked. [[faact-prep]] [[fare-prep]]"
+        ],
+        celiac: [
+          "Confirm every food in your kit is gluten-free, choose foods that need no cooking or refrigeration, and pack a manual can opener. [[gig-prep]]",
+          "Ask the Red Cross or your local shelter ahead of time whether they can provide gluten-free food, and bring your own even if they say yes. [[gig-prep]]",
+          "Pack sealed snacks and your own utensils, and recheck labels when you restock. [[celiac-ca]]"
+        ],
+        diabetes: [
+          "Pack one to two weeks of supplies (meter, strips, lancets, pump sets, glucagon, ketone strips, spare batteries) in a waterproof container. [[cdc-diabetes-em]]",
+          "Keep glucose tablets or another 15 grams of fast-acting carbohydrate, such as juice, hard candy, or honey, for lows. [[cdc-diabetes-em]]",
+          "Without power, keep insulin cool but never frozen. Unrefrigerated insulin can still work for up to 28 days at 59 to 86&deg;F; if it got hotter, check your blood sugar often and replace it when you can. [[fda-insulin]] [[cdc-insulin-em]]"
+        ],
+        kidney: [
+          "Ask your dietitian about the 3-Day Emergency Diet Plan and keep a bin of its foods: low-sodium canned meat or fish and vegetables, unsalted peanut butter, fruit in juice, and unsalted crackers. Start it as soon as you might miss dialysis. [[kcer-3day]]",
+          "The emergency diet limits fluid to about 2 cups a day and avoids salt, salt substitutes, dried beans, potatoes, tomatoes, and sports drinks. [[nkf-emergency]] [[kcer-3day]]",
+          "Still aim to get dialysis within 3 days. [[kcer-3day]]"
+        ],
+        lowSodium: [
+          "Choose cans labeled \"low sodium\" (140 mg or less per serving) or \"no salt added\"; \"reduced sodium\" only means 25% less than usual. [[fda-sodium]]",
+          "Rinse canned beans, tuna, and vegetables to wash off some of the sodium. [[fda-sodium]]",
+          "On the label, 5% Daily Value of sodium per serving is low and 20% is high. [[acl-shelf]]"
+        ],
+        vegetarian: ["Good no-cook proteins: canned beans, nut or sunflower butter, nuts and seeds, and shelf-stable milk. [[ncce-food]]"],
+        vegan: [
+          "Good no-cook proteins: canned beans, nut or sunflower butter, nuts and seeds, and shelf-stable fortified soy milk. [[ncce-food]]",
+          "Vegans need vitamin B12 from fortified foods or a supplement, so pack it. [[clemson-b12]]"
+        ],
+        halal: ["Shelters may not have halal food. In a 2025 disaster response, the Red Cross switched to grocery packages and trusted local kitchens for people with strict halal needs, so store certified food you trust. [[redcross-halal]]"],
+        kosher: ["Many observant Jews eat only packaged food with a kosher certification mark and ask a rabbi when only uncertified food is available, so store certified food you trust. [[ndin-jews]]"],
+        dairyFree: [
+          "Read labels for milk, lactose, whey, curds, milk by-products, dry milk solids, and nonfat dry milk. [[niddk-lactose]]",
+          "For calcium without dairy: calcium-fortified soy or almond milk, fortified cereal or juice, and canned salmon or sardines with soft bones. [[niddk-lactose]] [[usu-lactose]]"
+        ],
+        soft: ["Ask your speech-language pathologist which shelf-stable foods and thickener to store. Emergency foods often have different textures than everyday food, which can raise the risk of choking. [[jrm-texture]]"],
+        tube: [
+          "Keep at least a week of formula and feeding supplies, and keep the pump plugged in when you can. [[kent-enteral]]",
+          "Learn the gravity method before you need it: hang the bag 2 to 3 feet above you and control the flow with the roller clamp. Ask your care team whether bolus feeds are safe for your tube. [[mskcc-gravity]] [[kent-enteral]]",
+          "Ask your electric utility about priority restoration, and talk with your doctor about keeping powered equipment running. [[ready-disab]]"
+        ],
+        keto: [
+          "Pack no-cook keto foods (oils, nut butter, tuna, nuts), a small gram scale with spare batteries, and printed recipes with their calculations. [[charlie-gobag]]",
+          "If the diet is medical, such as for epilepsy, ask your keto team about glucose and ketone strips and a plan for when you can't follow the diet exactly. [[charlie-gobag]]"
+        ]
+      };
+      var lines = ["Store foods that need no refrigeration, cooking, or water, and plan them around everyone's needs. [[ready-food]]"];
+      (diet.allergy ? ["allergy"] : []).concat(diet.celiac ? ["celiac"] : [], picked).forEach(function (k) {
+        if (k === "vegetarian" && diet.vegan) return;
+        (T[k] || []).forEach(function (s) { if (s) lines.push(s); });
+      });
+      if (note) lines.push("Your note: &ldquo;" + UR.esc(note).replace(/\[/g, "&#91;") + "&rdquo;. Plan stored food around it, and ask your clinician or dietitian what to keep on hand.");
+      add("diet", "Dietary needs", lines, "bowl");
+    }
+    // Work: tips for each situation the household checked.
+    var W = {
+      remote: [
+        "Keep a power bank charged for work devices, and unplug electronics during an outage to avoid surge damage. [[ready-power]]",
+        "Internet (VoIP) phones need battery backup to work in an outage. [[fcc-emergency]]"
+      ],
+      commute: [
+        "Keep a car kit (jumper cables, reflective triangle, ice scraper, phone charger, blanket, map) and keep the tank full. [[ready-car]]",
+        "Write down your route and a backup, and check UDOT Traffic for closures. [[ready-commuter]] [[udot-traffic]]"
+      ],
+      transit: [
+        "Sign up for UTA service alerts. Older email and text subscriptions end November 1, 2026, so subscribe again. [[uta-alerts]]",
+        "Plan how you'd get home if trains and buses stop, and keep walking shoes at work. [[ready-commuter]]"
+      ],
+      outdoor: [
+        "OSHA's heat rule is water, rest, and shade. New or returning workers need shorter shifts and more breaks for the first few days. [[osha-heat]]",
+        "In wildfire smoke, a NIOSH-approved N95 cuts particles (not gases like carbon monoxide), but facial hair breaks the seal, and cloth masks don't protect you. [[niosh-smoke]] [[airnow-smoke]]",
+        "In the cold, take breaks somewhere warm and dry. Hypothermia can happen above 40&deg;F when you're wet. [[osha-cold]]"
+      ],
+      essential: [
+        "Decide now who will care for your kids, older relatives, and pets if you're called in or can't get home. [[ready-locations]] [[ready-pets]]",
+        "Keep a go-bag at work with enough for several days. [[ana-nurses]]",
+        "Ask your child's school how it reunites children with parents. [[ready-responder]]"
+      ],
+      money: [
+        "Base your savings goal on what past surprises cost you, and save tax refunds or windfalls when income is uneven. [[cfpb-guide]]",
+        "Keep some cash in small bills; ATMs and card readers may not work. [[ready-fin]]"
+      ],
+      self: ["In Utah, self-employment income may not qualify for regular unemployment benefits. After a declared major disaster, self-employed people may get Disaster Unemployment Assistance for up to 26 weeks. [[dws-ui-guide]] [[dol-dua]]"],
+      travel: [
+        "Pick an out-of-state contact everyone checks in with. [[br-comm]]",
+        "Fill out FEMA's family communication card and keep copies in every wallet. [[fema-comm-card]]",
+        "Save copies of important documents to the cloud, and use the FEMA app for weather alerts in up to five places. [[ready-cloud]] [[ready-older]]"
+      ],
+      nights: [
+        "Make sure phone emergency alerts are on; they need no sign-up. [[ready-alerts]] [[apple-alerts]] [[android-alerts]]",
+        "A NOAA Weather Radio with an alert setting can wake you for warnings. [[nws-nwrsame]]"
+      ]
+    };
+    var wl = [], work = p.work || {};
+    ["remote", "commute", "transit", "outdoor", "essential", "travel", "nights"].forEach(function (k) { if (work[k]) wl = wl.concat(W[k]); });
+    if (work.commute || work.transit) wl.push("Keep a small kit at work so you could stay 24 hours: food, water, medicines, and walking shoes. [[ready-kit]]");
+    if (work.hourly || p.selfEmployed) wl = wl.concat(W.money);
+    if (p.selfEmployed) wl = wl.concat(W.self, ["Aim for a larger emergency fund than salaried households, since income can stop without notice. [[cfpb-fund]]"]);
+    if (wl.length) add("work", "Work and getting around", wl, "briefcase");
     if (h.seniors > 0) add("older", "Older adults", [
       "Set up a daily check-in with a neighbor or relative during heat, cold, outages, and outbreaks. [[ready-older]]",
       "Keep spare glasses, hearing-aid batteries, and a medication list in the go-bag. [[ready-kit]]",
@@ -485,10 +653,79 @@
   };
 
   UR.defaultProfile = function () {
-    return { county: "", setting: "", homeType: "", brick: "", tenure: "", adults: 1, seniors: 0, children: 0, infants: 0,
+    var diet = { allergy: false, celiac: false, formula: false, other: false, otherText: "", allergens: {} };
+    UR.DIETS.forEach(function (d) { diet[d.id] = false; });
+    UR.ALLERGENS.forEach(function (a) { diet.allergens[a.id] = false; });
+    var work = {};
+    UR.WORK.forEach(function (w) { work[w.id] = false; });
+    return { county: "", setting: "", homeType: "", brick: "", tenure: "", cooling: "", adults: 1, seniors: 0, children: 0, infants: 0,
       petsSmall: 0, petsLarge: 0, livestock: false, flock: false,
       med: { rx: false, controlled: false, refrigerated: false, powered: false, mobility: false, lungHeart: false, pregnancy: false },
-      diet: { allergy: false, celiac: false, formula: false, other: false },
+      diet: diet, work: work,
       car: "", budget: "", space: "", selfEmployed: false, backcountry: false, hazards: null };
   };
+
+  // ---------------------------------------------------------------- diets
+  // Shown under "Another diet or food need". `words` are what the free-text box recognizes
+  // (lowercase; matched at the start of a word, so "diabet" catches "diabetes" and "diabetic").
+  UR.DIETS = [
+    { id: "diabetes",   label: "Diabetes",                       hint: "Type 1 or type 2",                         words: ["diabet", "t1d", "t2d", "type 1", "type 2", "insulin", "blood sugar", "glucose", "a1c", "prediabet"] },
+    { id: "kidney",     label: "Kidney disease or dialysis",     hint: "Renal diet, potassium or fluid limits",    words: ["kidney", "renal", "dialysis", "ckd", "potassium", "phosph", "fluid restrict"] },
+    { id: "lowSodium",  label: "Low-sodium",                     hint: "Heart failure, high blood pressure",       words: ["sodium", "low salt", "low-salt", "no salt", "salt free", "salt-free", "heart failure", "chf", "hypertension", "blood pressure", "dash diet"] },
+    { id: "vegetarian", label: "Vegetarian",                     hint: "",                                         words: ["vegetarian", "veggie", "no meat", "meatless", "pescatarian", "lacto-ovo", "lacto ovo", "ovo-lacto"] },
+    { id: "vegan",      label: "Vegan or plant-based",           hint: "",                                         words: ["vegan", "plant based", "plant-based", "no animal", "whole food plant"] },
+    { id: "halal",      label: "Halal",                          hint: "",                                         words: ["halal", "muslim", "islam", "zabiha"] },
+    { id: "kosher",     label: "Kosher",                         hint: "",                                         words: ["kosher", "jewish", "pareve", "parve", "glatt"] },
+    { id: "dairyFree",  label: "Dairy-free or lactose intolerant", hint: "",                                       words: ["dairy", "lactose", "milk free", "milk-free", "casein", "whey"] },
+    { id: "soft",       label: "Soft or pureed foods",           hint: "Trouble chewing or swallowing",            words: ["soft food", "soft diet", "puree", "pureed", "blended", "dysphagia", "swallow", "chew", "dentures", "mechanical soft", "thicken"] },
+    { id: "tube",       label: "Tube feeding",                   hint: "Enteral formula, G-tube or NG tube",       words: ["tube", "g-tube", "gtube", "g tube", "peg", "ng tube", "enteral", "feeding pump"] },
+    { id: "keto",       label: "Low-carb or ketogenic",          hint: "Including medical keto for epilepsy",      words: ["keto", "ketogenic", "low carb", "low-carb", "atkins", "epilepsy diet"] }
+  ];
+  // The nine major food allergens named by U.S. food-labeling law.
+  UR.ALLERGENS = [
+    { id: "milk", label: "Milk", words: ["milk allerg", "dairy allerg"] },
+    { id: "egg", label: "Eggs", one: "Egg", words: ["egg"] },
+    { id: "peanut", label: "Peanuts", one: "Peanut", words: ["peanut"] },
+    { id: "treeNut", label: "Tree nuts", one: "Tree nut", words: ["tree nut", "almond", "cashew", "walnut", "pecan", "pistachio", "hazelnut", "nuts", "nut allerg"] },
+    { id: "soy", label: "Soy", words: ["soy"] },
+    { id: "wheat", label: "Wheat", words: ["wheat"] },
+    { id: "fish", label: "Fish", words: ["fish allerg", "fish"] },
+    { id: "shellfish", label: "Shellfish", words: ["shellfish", "shrimp", "crab", "lobster", "crustacean"] },
+    { id: "sesame", label: "Sesame", words: ["sesame"] }
+  ];
+  var DIET_ALSO = [
+    { id: "celiac", words: ["celiac", "coeliac", "gluten"] },
+    { id: "allergy", words: ["allerg", "anaphyla", "epipen", "epi-pen", "epinephrine", "auvi-q"] },
+    { id: "formula", words: ["infant formula", "baby formula"] }
+  ];
+  function escRe(w) { return w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+  // Diet words match at the start of a word; allergen words must be whole words (so "eggplant" isn't "egg").
+  function said(text, words, whole) {
+    return words.some(function (w) { return new RegExp("(^|[^a-z])" + escRe(w) + (whole && w.indexOf("allerg") === -1 ? "(s|es)?($|[^a-z])" : "")).test(text); });
+  }
+  // Free text in, recognized diet ids and allergen ids out. Runs only in the browser; nothing is sent anywhere.
+  UR.detectDiets = function (text) {
+    var t = String(text || "").toLowerCase(), diets = [], allergens = [];
+    if (!t.trim()) return { diets: diets, allergens: allergens };
+    UR.DIETS.concat(DIET_ALSO).forEach(function (d) { if (said(t, d.words)) diets.push(d.id); });
+    // A named food is an allergy only when the text says so, or names nothing else ("shellfish" alone).
+    if (diets.indexOf("allergy") !== -1 || !diets.length) UR.ALLERGENS.forEach(function (a) { if (said(t, a.words, true)) allergens.push(a.id); });
+    if (allergens.length && diets.indexOf("allergy") === -1) diets.push("allergy");
+    // "tube" alone is too loose ("tubes of toothpaste"); keep it only with a feeding word nearby.
+    if (diets.indexOf("tube") !== -1 && !/feed|enteral|g-?tube|ng tube|peg|formula/.test(t)) diets.splice(diets.indexOf("tube"), 1);
+    if (diets.indexOf("vegan") !== -1 && diets.indexOf("vegetarian") !== -1 && !/vegetarian/.test(t)) diets.splice(diets.indexOf("vegetarian"), 1);
+    return { diets: diets, allergens: allergens };
+  };
+
+  // ---------------------------------------------------------------- work
+  UR.WORK = [
+    { id: "remote",    label: "I work from home",                       hint: "Power and internet outages hit work too" },
+    { id: "commute",   label: "I commute by car",                       hint: "Especially a long drive" },
+    { id: "transit",   label: "I ride TRAX, FrontRunner, or the bus",   hint: "" },
+    { id: "outdoor",   label: "I work outdoors",                        hint: "Construction, landscaping, farming, delivery" },
+    { id: "essential", label: "I'm a healthcare worker, first responder, or other essential worker", hint: "You may be called in when disaster strikes" },
+    { id: "hourly",    label: "My job is hourly with no paid leave",    hint: "" },
+    { id: "travel",    label: "I travel or work far from home",         hint: "Trucking, travel, out-of-state rotations" },
+    { id: "nights",    label: "I work nights or rotating shifts",       hint: "You may sleep through daytime alerts" }
+  ];
 })(typeof window !== "undefined" ? window : globalThis);

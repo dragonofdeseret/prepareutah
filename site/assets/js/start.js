@@ -12,6 +12,8 @@
     var p = Object.assign(UR.defaultProfile(), saved || {});
     p.med = Object.assign(UR.defaultProfile().med, (saved && saved.med) || {});
     p.diet = Object.assign(UR.defaultProfile().diet, (saved && saved.diet) || {});
+    p.diet.allergens = Object.assign(UR.defaultProfile().diet.allergens, (saved && saved.diet && saved.diet.allergens) || {});
+    p.work = Object.assign(UR.defaultProfile().work, (saved && saved.work) || {});
 
     function getPath(o, k) { return k.split(".").reduce(function (a, s) { return a ? a[s] : undefined; }, o); }
     function setPath(o, k, v) { var s = k.split("."), last = s.pop(); s.reduce(function (a, x) { return a[x] = a[x] || {}; }, o)[last] = v; }
@@ -26,6 +28,47 @@
     });
     if (p.hazards && p.hazards.length) form.querySelectorAll('input[name="hz"]').forEach(function (c) { c.checked = p.hazards.indexOf(c.value) !== -1; });
 
+    // Sub-questions (allergens, more diets) show only when their parent box is checked.
+    function syncReveal() {
+      form.querySelectorAll("[data-reveal]").forEach(function (r) {
+        var c = form.querySelector('[name="' + r.dataset.reveal + '"]'); r.hidden = !(c && c.checked);
+      });
+    }
+    // The free-text diet box checks the boxes it recognizes. It remembers which ones it checked,
+    // so editing the text can uncheck them again, and it never re-checks a box the person unchecked.
+    var dietBox = form.querySelector('[name="diet.otherText"]'), dietOut = form.querySelector("[data-detect]");
+    var auto = {}, dismissed = {};
+    var LABEL = { celiac: "Celiac or gluten-free", allergy: "Food allergies", formula: "Infant formula" };
+    UR.DIETS.forEach(function (d) { LABEL[d.id] = d.label; });
+    UR.ALLERGENS.forEach(function (a) { LABEL["a-" + a.id] = a.one || a.label; });
+    function detect(apply) {
+      if (!dietBox) return;
+      var r = UR.detectDiets(dietBox.value);
+      var names = r.diets.map(function (d) { return "diet." + d; }).concat(r.allergens.map(function (a) { return "diet.allergens." + a; }));
+      var labels = r.diets.filter(function (d) { return d !== "allergy" || !r.allergens.length; }).map(function (d) { return LABEL[d]; })
+        .concat(r.allergens.map(function (a) { return LABEL["a-" + a] + " allergy"; }));
+      if (apply) {
+        Object.keys(auto).forEach(function (n) {
+          if (names.indexOf(n) !== -1) return;
+          var c = form.querySelector('[name="' + n + '"]'); if (c) c.checked = false; delete auto[n];
+        });
+        names.forEach(function (n) {
+          var c = form.querySelector('[name="' + n + '"]');
+          if (c && !c.checked && !dismissed[n]) { c.checked = true; auto[n] = true; }
+        });
+        syncReveal();
+      }
+      dietOut.textContent = labels.length ? "We recognized: " + labels.join(", ") + ". The matching boxes are checked; uncheck anything that doesn't fit."
+        : dietBox.value.trim() ? "We'll keep your note with your plan as written." : "";
+    }
+    if (dietBox) dietBox.addEventListener("input", function () { detect(true); });
+    form.addEventListener("change", function (e) {
+      var n = e.target.name; if (!n) return;
+      if (auto[n] && !e.target.checked) { delete auto[n]; dismissed[n] = true; }
+      if (form.querySelector('[data-reveal="' + n + '"]')) syncReveal();
+    });
+    syncReveal(); detect(false);
+
     function read() {
       var o = UR.defaultProfile();
       [].slice.call(form.elements).forEach(function (el) {
@@ -36,6 +79,10 @@
         else setPath(o, el.name, el.value);
       });
       o.hazards = [].slice.call(form.querySelectorAll('input[name="hz"]:checked')).map(function (c) { return c.value; });
+      // Hidden sub-answers don't count once their parent box is unchecked.
+      if (!o.diet.other) { UR.DIETS.forEach(function (d) { o.diet[d.id] = false; }); o.diet.otherText = ""; }
+      if (!o.diet.allergy) UR.ALLERGENS.forEach(function (a) { o.diet.allergens[a.id] = false; });
+      o.diet.otherText = String(o.diet.otherText || "").trim().slice(0, 200);
       return o;
     }
     function updateBands() {

@@ -2,9 +2,10 @@
 
 **Utah household readiness.** A free, private, plain-language preparedness site for Utah households, at prepareutah.com. Sister site to [FaultLine Utah](https://faultlineutah.com/) (earthquake hazards by address).
 
-- **Make my plan** (`start.html`): a short questionnaire (county, setting, home, household, health and diet needs, resources).
-- **My plan** (`plan.html`): the personal plan it builds. Priority bands for 10 Utah hazards plus money, checklists for 7, 14, 30 and 90 days sized to the household, a budget-aware "buy first" list, before/during/after actions, and a print/PDF view.
+- **Make my plan** (`start.html`): a short questionnaire (county, setting, home and cooling, household, health, diets and allergens, work and getting around, resources).
+- **My plan** (`plan.html`): the personal plan it builds. A free "first hour" starter list, priority bands for 12 Utah hazards plus money, the household's county alert sign-up, checklists for 7, 14, 30 and 90 days sized to the household, a budget-aware "buy first" list, cards for diets and work, before/during/after actions, and a print/PDF view.
 - **Hazards** (`hazards/`): one stand-alone guide per hazard, with live official links.
+- **Alerts** (`alerts.html`): how to get emergency alerts in every Utah county, plus phone settings, weather radio, and what "Ready, Set, Go" means.
 - **Sources** (`sources.html`) and **About** (`about.html`): every source, privacy, the disclaimer, and the sister-site note.
 
 It's a plain static site: HTML, CSS, and JavaScript, with nothing to install. Answers and checkmarks stay in the visitor's browser (`localStorage` keys `ur.profile`, `ur.checks`, `ur.tab`; "ur" is left over from the working name and isn't visible to anyone). No accounts, cookies, analytics, or outside fonts. The only outside request is the optional "Recent Utah earthquakes" list, which loads public USGS data and falls back to a link if USGS is down.
@@ -17,7 +18,8 @@ site/                     ← the website; this folder is what gets published
   assets/css/style.css    all styling, plus print styles
   assets/js/sources.js    ← source registry (id → publisher, title, URL)
   assets/js/hazards.js    ← hazard guide text
-  assets/js/planner.js    ← county bands, checklist items, quantities, household cards
+  assets/js/planner.js    ← county bands, checklist items, quantities, household cards, diets, work, first hour
+  assets/js/alerts.js     ← county alert sign-ups and statewide alert steps
   assets/js/*.js          app code (questionnaire, dashboard, USGS list, citations)
   sitemap.xml             generated with the pages
   robots.txt, _headers
@@ -44,6 +46,9 @@ Then open http://localhost:8738. Press Ctrl+C in the terminal to stop it. (Fault
 | Hazard guide text | `site/assets/js/hazards.js` |
 | Checklist items, county bands, household cards | `site/assets/js/planner.js` |
 | Sources and links | `site/assets/js/sources.js` |
+| County alert sign-ups | `site/assets/js/alerts.js` |
+| Diet list and the words the free-text box recognizes | `UR.DIETS` and `UR.ALLERGENS` in `planner.js` |
+| Work options | `UR.WORK` in `planner.js` (tips are in `UR.additions`) |
 | Home, About, Sources page text, header, footer | `scripts/build.js` |
 
 Cite a source by writing `[[source-id]]` in any text. The id must exist in `sources.js`; a missing one shows a red "[source missing]". Mark planning guesses with *(estimate)* and unconfirmed items with [unverified] or [verify]; both get their own styling.
@@ -65,10 +70,15 @@ FaultLine Utah is linked from the footer of every page, the home page (sister-si
 - **Priority bands** (Higher priority / Elevated / Present / Lower). Each county gets a base band per hazard. Setting and household then adjust it:
   - Setting: valley floors raise inversions; foothill/bench homes raise wildfire and landslide; canyon homes raise wildfire, landslide, flood and power.
   - Household: lung or heart conditions raise smoke, dust and outbreaks; powered medical equipment raises power outages; older brick raises earthquake; no winter backcountry use caps avalanche.
+  - Heat: Washington County starts highest, then the south, desert and Wasatch Front valleys. No air conditioning, an older adult, a baby, a pregnancy, a chronic condition, or outdoor work each raise it.
+  - Home fire: Elevated everywhere; an older adult (or, failing that, someone with limited mobility) raises it.
+  - Work: outdoor work raises heat and air quality; hourly or self-employed income raises money.
 
   The county base bands are an **editorial judgment** drawn from UGS seismic information, Great Salt Lake proximity, the 2026 drought declaration, Utah Avalanche Center regions and terrain. The site labels them as general guidance, not official risk ratings.
 - **Quantities:** water is 1 gallon per person per day (Be Ready Utah), with totals for 7, 14, 30 and 90 days. Pet water is a labeled estimate. Food is counted in person-days. Flashlights, go-bags and similar items are per person. Cost ranges come from the HiveWatch Utah plan's per-adult estimates and are always labeled as estimates.
 - **Deduplication:** every checklist item exists once and carries tags for the hazards it serves. Deselected hazards drop their hazard-only items.
+- **First hour:** five free steps everyone gets (alerts, meeting places, smoke-alarm test, shutoffs, a water start) plus personal ones while the total stays within 60 minutes. Steps that match a checklist item share its id, so checking either checks both.
+- **Diet text box:** `UR.detectDiets` matches what people type against each diet's `words` and checks the boxes it recognizes, only in the browser. Allergen words must be whole words and count only when the text mentions an allergy or names no other diet ("eggplant" isn't an egg allergy). Anything unrecognized is shown in the plan as the person's own note.
 - **Buy first:** the most protective purchases from the 7- and 14-day tiers. Items over the household's budget move down the list. Critical medical items (prescriptions, backup power for medical equipment, formula) always stay near the top.
 
 ## Checks
@@ -120,9 +130,17 @@ The repo's Settings → Pages already has Source set to **GitHub Actions** and `
 - [ ] Re-check fast-changing figures (measles counts, H5N1, drought and fire data) and their "as of" dates.
 - [ ] A share image (`og:image`) for links posted on social media.
 
+**Alerts to confirm** (checked Oct 22, 2026; agencies change vendors, so re-check `alerts.js` every few months)
+- [ ] Wayne County: its sign-up link opens the Sevier County Sheriff's Office system. Confirm with Wayne County Emergency Management (435-836-1348).
+- [ ] Piute County: no public sign-up found. Ask the sheriff's office (435-577-2893) how alerts reach residents.
+- [ ] Uintah County: its website was blank when checked; the Tri-County link comes from the Daggett and Duchesne sites.
+- [ ] Evacuation-zone maps: only Washington County (Genasys Protect) and Davis County (fire evacuation zones) are confirmed. Daggett, Duchesne and Uintah bought Genasys evacuation software in 2023, and Beaver, Iron, Garfield and Kane were expected to adopt it; add their links once the counties publish them.
+- [ ] City systems: only Salt Lake County's list and Layton were checked. Other cities may run their own.
+
 **Expert review**
 - [ ] Seismologist: the earthquake guide and the county bands in `planner.js`.
-- [ ] Clinician and pharmacist: outbreak, medication and medical-equipment text.
+- [ ] Clinician and pharmacist: outbreak, medication and medical-equipment text, the heat-illness steps, and the diabetes, kidney, tube-feeding and allergy tips.
+- [ ] Registered dietitian: the diet tips (the soft-foods and halal tips rest on thin sources).
 - [ ] Utah emergency manager: the county priority bands.
 
 ## Disclaimer

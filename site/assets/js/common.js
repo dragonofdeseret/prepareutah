@@ -28,6 +28,13 @@
       });
     });
     document.querySelectorAll("[data-print]").forEach(function (b) { b.addEventListener("click", function () { window.print(); }); });
+    // "Jump to" pickers (Alerts page): move to the chosen card and focus its heading.
+    document.querySelectorAll("select[data-jump]").forEach(function (s) {
+      s.addEventListener("change", function () {
+        var t = s.value && document.getElementById(s.value); if (!t) return;
+        t.scrollIntoView({ block: "start" }); var hd = t.querySelector("h3"); if (hd) { hd.setAttribute("tabindex", "-1"); hd.focus({ preventScroll: true }); }
+      });
+    });
   });
   // Open all <details> while printing so nothing is hidden on paper.
   var reopened = [];

@@ -2,18 +2,18 @@
    Content lives in site/assets/js/*.js and is shared with the browser. Output: *.html in site/. */
 const fs = require("fs"), path = require("path");
 const ROOT = path.resolve(__dirname, "..", "site");
-["sources", "hazards", "planner", "icons", "render"].forEach(f => require(path.join(ROOT, "assets/js", f + ".js")));
+["sources", "hazards", "planner", "icons", "render", "alerts"].forEach(f => require(path.join(ROOT, "assets/js", f + ".js")));
 const UR = globalThis.UR;
 const ic = UR.icon, cite = UR.cite, esc = UR.esc;
 const NAME = "Prepare Utah";
 const SITE = "https://prepareutah.com/";
-const VERSION = "2026-10-22";
+const VERSION = "2026-10-22b";
 // Sister site. Linked from the footer, home page, earthquake page, Sources and About.
 const SISTER = { name: "FaultLine Utah", url: "https://faultlineutah.com/" };
 const ext = (href, text) => `<a href="${href}" target="_blank" rel="noopener">${text}<span class="sr-only"> (opens in a new tab)</span></a>`;
 
 function layout({ rel, title, desc, root = "", active = "", body, scripts = [], page = "" }) {
-  const nav = [["index.html", "Home", "home"], ["start.html", "Make my plan", "start"], ["hazards/index.html", "Hazards", "hazards"], ["sources.html", "Sources", "sources"], ["about.html", "About", "about"]];
+  const nav = [["index.html", "Home", "home"], ["start.html", "Make my plan", "start"], ["hazards/index.html", "Hazards", "hazards"], ["alerts.html", "Alerts", "alerts"], ["sources.html", "Sources", "sources"], ["about.html", "About", "about"]];
   const navHtml = nav.map(([href, label, id]) => `<li><a href="${root}${href}"${active === id ? ' aria-current="page"' : ""}${id === "start" ? ' class="cta"' : ""}>${label}</a></li>`).join("");
   const url = rel && rel !== "404.html" ? SITE + rel.replace(/(^|\/)index\.html$/, "$1") : "";
   return `<!doctype html>
@@ -62,7 +62,7 @@ ${body}
       </div>
       <div>
         <h2>Explore</h2>
-        <ul><li><a href="${root}start.html">Make my plan</a></li><li><a href="${root}plan.html">My plan</a></li><li><a href="${root}hazards/index.html">All hazards</a></li><li><a href="${root}sources.html">Sources</a></li><li><a href="${root}about.html">About &amp; privacy</a></li></ul>
+        <ul><li><a href="${root}start.html">Make my plan</a></li><li><a href="${root}plan.html">My plan</a></li><li><a href="${root}hazards/index.html">All hazards</a></li><li><a href="${root}alerts.html">Alerts by county</a></li><li><a href="${root}sources.html">Sources</a></li><li><a href="${root}about.html">About &amp; privacy</a></li></ul>
         <h2 style="margin-top:18px">Sister site</h2>
         <p class="small" style="margin:0">${ext(SISTER.url, SISTER.name)}: earthquake hazards for any Utah address, in plain language.</p>
       </div>
@@ -144,7 +144,7 @@ emit("index.html", {
 </section>
 <section class="block alt">
   <div class="wrap">
-    <span class="eyebrow">Ten hazards plus money</span>
+    <span class="eyebrow">${["", "", "", "", "", "", "", "", "", "", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen"][UR.hazards.length - 1] || UR.hazards.length - 1} hazards plus money</span>
     <h2>Every Utah hazard, one calm place</h2>
     <p class="muted">Each page stands on its own: why it matters in Utah, who's most affected, what to do before, during, and after, and where to check live conditions.</p>
     <div class="grid three">${UR.hazards.map(h => hazardCard(h, "")).join("")}</div>
@@ -177,6 +177,7 @@ emit("index.html", {
 // ---------------- questionnaire
 const radio = (name, value, label, hint, extra = "") => `<label class="choice"><input type="radio" name="${name}" value="${value}"${extra}><span class="box"><span><b>${label}</b>${hint ? `<small>${hint}</small>` : ""}</span></span></label>`;
 const check = (name, label, hint, extra = "") => `<label class="choice"><input type="checkbox" name="${name}"${extra}><span class="box"><span><b>${label}</b>${hint ? `<small>${hint}</small>` : ""}</span></span></label>`;
+const chip = (name, label) => `<label class="choice chip"><input type="checkbox" name="${name}"><span class="box"><span><b>${label}</b></span></span></label>`;
 const counter = (name, label, hint, min = 0) => `<div class="counter"><div class="lbl" id="lbl-${name}"><b>${label}</b><small>${hint}</small></div><div class="stepper"><button type="button" data-step="-1" data-for="${name}" aria-label="Fewer: ${label}">&minus;</button><input type="number" inputmode="numeric" min="${min}" max="20" name="${name}" id="f-${name}" aria-labelledby="lbl-${name}" value="${min}"><button type="button" data-step="1" data-for="${name}" aria-label="More: ${label}">+</button></div></div>`;
 const steps = [
   { t: "Where you live", b: `
@@ -187,7 +188,8 @@ const steps = [
   { t: "Your home", b: `
     <fieldset><legend>What kind of home?</legend><div class="choices">${radio("homeType", "house", "House or townhome", "")}${radio("homeType", "apartment", "Apartment or condo", "")}${radio("homeType", "mobile", "Mobile or manufactured home", "")}</div></fieldset>
     <fieldset><legend>Is it older brick, built before about 1975?</legend><p class="hint">Older brick buildings may be unreinforced masonry (URM), which matters a lot in earthquakes.</p><div class="choices cols-2">${radio("brick", "yes", "Yes", "")}${radio("brick", "no", "No", "")}${radio("brick", "unsure", "Not sure", "We'll show you the warning signs")}</div></fieldset>
-    <fieldset><legend>Do you own or rent?</legend><div class="choices cols-2">${radio("tenure", "own", "Own", "")}${radio("tenure", "rent", "Rent", "We'll add questions for your landlord")}</div></fieldset>` },
+    <fieldset><legend>Do you own or rent?</legend><div class="choices cols-2">${radio("tenure", "own", "Own", "")}${radio("tenure", "rent", "Rent", "We'll add questions for your landlord")}</div></fieldset>
+    <fieldset><legend>How do you cool your home in summer?</legend><p class="hint">Optional. It shapes your extreme-heat priority.</p><div class="choices cols-2">${radio("cooling", "central", "Central air conditioning", "")}${radio("cooling", "window", "Window or portable AC", "")}${radio("cooling", "swamp", "Evaporative (swamp) cooler", "")}${radio("cooling", "none", "Fans only, or nothing", "")}</div></fieldset>` },
   { t: "Who's at home", b: `
     <fieldset><legend>People in your household</legend><p class="hint">Water and food quantities are computed from these numbers.</p>
       ${counter("adults", "Adults (18&ndash;64)", "", 0)}${counter("seniors", "Older adults (65+)", "", 0)}${counter("children", "Children (2&ndash;17)", "", 0)}${counter("infants", "Babies and toddlers (under 2)", "", 0)}</fieldset>
@@ -207,13 +209,23 @@ const steps = [
     </div></fieldset>` },
   { t: "Food needs", b: `
     <fieldset><legend>Any dietary needs to plan around? <span class="muted" style="font-weight:400">(check all that apply)</span></legend><div class="choices">
-      ${check("diet.allergy", "Food allergies", "")}${check("diet.celiac", "Celiac disease", "")}${check("diet.formula", "Infant formula", "")}${check("diet.other", "Other special diet", "")}
+      ${check("diet.allergy", "Food allergies", "", ' aria-controls="reveal-allergens"')}
+      <div class="reveal" id="reveal-allergens" data-reveal="diet.allergy" hidden><p class="hint">Which ones? (optional)</p><div class="chips">${UR.ALLERGENS.map(a => chip("diet.allergens." + a.id, a.label)).join("")}</div></div>
+      ${check("diet.celiac", "Celiac disease or gluten-free", "")}${check("diet.formula", "Infant formula", "")}
+      ${check("diet.other", "Another diet or food need", "Diabetes, kidney disease, vegetarian, halal, soft foods, and more", ' aria-controls="reveal-diets"')}
+      <div class="reveal" id="reveal-diets" data-reveal="diet.other" hidden>
+        <div class="choices cols-2">${UR.DIETS.map(d => check("diet." + d.id, d.label, d.hint)).join("")}</div>
+        <label class="q-label" for="f-diet-text" style="display:block;margin-top:16px">Something else? Describe it in your own words</label>
+        <p class="hint">For example "type 1 diabetes and vegan" or "low potassium." We'll check the boxes that match. This stays in your browser.</p>
+        <input type="text" class="text-input" id="f-diet-text" name="diet.otherText" maxlength="200" autocomplete="off" spellcheck="true">
+        <p class="detect small" data-detect aria-live="polite"></p>
+      </div>
     </div></fieldset>` },
   { t: "Your resources", b: `
     <fieldset><legend>Do you have a car?</legend><div class="choices cols-2">${radio("car", "yes", "Yes, reliably", "")}${radio("car", "shared", "Shared or sometimes", "")}${radio("car", "no", "No car", "")}</div></fieldset>
     <fieldset><legend>What budget feels realistic for preparedness right now?</legend><div class="choices">${radio("budget", "tight", "Tight", "Free and low-cost steps first")}${radio("budget", "moderate", "Moderate", "Can spend a little each month")}${radio("budget", "comfortable", "Comfortable", "Can invest in bigger items")}</div></fieldset>
     <fieldset><legend>How much storage space do you have?</legend><div class="choices">${radio("space", "small", "Very little", "A closet, under the bed")}${radio("space", "medium", "Some", "A pantry, a few closets")}${radio("space", "large", "Plenty", "Garage, basement, or storage room")}</div></fieldset>
-    <fieldset><legend>Work</legend><div class="choices">${check("selfEmployed", "I'm self-employed or my income is irregular", "We'll suggest a bigger emergency fund")}</div></fieldset>` },
+    <fieldset><legend>Work and getting around <span class="muted" style="font-weight:400">(check all that apply)</span></legend><p class="hint">Shapes your commute, outage, heat, and money plans. Skip it if none fit.</p><div class="choices">${UR.WORK.map(w => (w.id === "travel" ? check("selfEmployed", "I'm self-employed, a gig worker, or my income is irregular", "We'll suggest a bigger emergency fund") : "") + check("work." + w.id, w.label, w.hint)).join("")}</div></fieldset>` },
   { t: "Hazards to include", b: `
     <p class="hint">All are included by default. The bands come from your county and setting (general guidance, not an official rating).</p>
     <div class="btn-row" style="margin-bottom:12px"><button type="button" class="btn small secondary" data-hz-all>Select all</button><button type="button" class="btn small secondary" data-hz-relevant>Only higher &amp; elevated</button></div>
@@ -238,7 +250,7 @@ emit("start.html", {
 
 // ---------------- plan (dashboard shell)
 emit("plan.html", {
-  title: `My plan · ${NAME}`, desc: "Your personalized Utah preparedness plan.", active: "", page: "plan", scripts: ["plan"],
+  title: `My plan · ${NAME}`, desc: "Your personalized Utah preparedness plan.", active: "", page: "plan", scripts: ["alerts", "plan"],
   body: `<div id="plan-root"><div class="wrap empty"><p>Loading your plan&hellip;</p><noscript><p>This page needs JavaScript to build your personal plan. Every hazard page works without it: <a href="hazards/index.html">browse hazards</a>.</p></noscript></div></div>`
 });
 
@@ -273,8 +285,8 @@ UR.hazards.forEach(h => {
   </div>
   <aside class="hz-aside">
     <div class="card">
-      <h3>${ic("live")} Live conditions</h3>
-      <p class="small muted">Official sources, updated by the agencies themselves.</p>
+      <h3>${ic("live")} ${esc(h.liveTitle || "Live conditions")}</h3>
+      <p class="small muted">${esc(h.liveNote || "Official sources, updated by the agencies themselves.")}</p>
       <ul class="live-list">${h.live.map(l => `<li><a href="${esc(UR.sources[l.src].url)}" target="_blank" rel="noopener"><span class="dot" aria-hidden="true"></span>${esc(l.label)}<span class="sr-only"> (opens in a new tab)</span></a></li>`).join("")}</ul>
       ${h.id === "earthquake" ? `<div class="quakes" id="quake-widget" style="margin-top:12px"><h3 style="font-size:1rem">Recent Utah quakes (M1.5+, 14 days)</h3><div data-quakes><p class="small muted">Loading from USGS&hellip;</p></div></div>` : ""}
     </div>
@@ -294,6 +306,27 @@ emit("hazards/index.html", {
   title: `Utah hazards · ${NAME}`, desc: "Plain-language, sourced guides to every major Utah hazard.", root: "../", active: "hazards", page: "hazards",
   body: `<section class="hz-hero"><div class="wrap"><span class="eyebrow">Hazard guides</span><h1>Utah hazards, one at a time</h1><p class="lede" style="max-width:44em">Each guide stands on its own: why it matters here, who's most affected, what to do before, during, and after, and links to live official conditions. Want it all sized to your household? <a href="../start.html">Make your plan</a>.</p></div></section>
 <section class="block"><div class="wrap"><div class="grid three">${UR.hazards.map(h => hazardCard(h, "../")).join("")}</div></div></section>`
+});
+
+// ---------------- alerts by county
+emit("alerts.html", {
+  title: `Emergency alerts in Utah, county by county · ${NAME}`, active: "alerts", page: "alerts",
+  desc: "How to get emergency alerts anywhere in Utah: county sign-up links, phone settings, evacuation zones, and what Ready, Set, Go means.",
+  body: `<section class="hz-hero"><div class="wrap"><span class="eyebrow">Alerts</span><h1>Get emergency alerts where you live</h1><p class="lede" style="max-width:46em">${cite(UR.alertsLede || "")}</p></div></section>
+<section class="block"><div class="wrap grid two" style="align-items:start">
+  <div>
+    <h2>Everyone in Utah</h2>
+    <ol class="alert-steps">${UR.alertSteps.map(s => `<li><strong>${esc(s.title)}.</strong> ${cite(s.text)}</li>`).join("")}</ol>
+    <h2 id="ready-set-go" style="margin-top:28px">What "Ready, Set, Go" means</h2>
+    <dl class="rsg-list">${UR.readySetGo.map(s => `<dt>${esc(s.term)}</dt><dd>${cite(s.text)}</dd>`).join("")}</dl>
+    <p class="small muted">Links checked ${esc(UR.ALERTS_CHECKED)}. Agencies change alert vendors from time to time; if a link is out of date, your county sheriff or emergency manager can point you to the current one.</p>
+  </div>
+  <div>
+    <h2>Your county</h2>
+    <p class="no-print"><label for="county-jump" class="q-label" style="display:block">Jump to your county</label><select id="county-jump" data-jump><option value="">Choose your county&hellip;</option>${UR.counties.map(c => `<option value="county-${c.toLowerCase().replace(/\s+/g, "-")}">${c} County</option>`).join("")}</select></p>
+    <div class="county-list">${UR.counties.map(c => UR.alertsCard(c, { heading: true })).join("")}</div>
+  </div>
+</div></section>`
 });
 
 // ---------------- sources

@@ -28,7 +28,7 @@
       "Anyone who depends on power, pharmacies, or home care, because services may be out for days or longer."
     ],
     before: [
-      "Practice <strong>Drop, Cover, and Hold On</strong>. Utah drills every April in the Great Utah ShakeOut. [[br-quake]] [[ready-quake]]",
+      "Practice <strong>Drop, Cover, and Hold On</strong>. Utahns drill together in the Great Utah ShakeOut, and you can register a household drill for any day of the year. [[shakeout-ut]] [[ready-quake]]",
       "Strap your water heater, which also protects stored water. Be Ready Utah lists water-heater straps as part of water prep. [[br-water]]",
       "Secure tall furniture, TVs, and heavy wall hangings, and move heavy things off high shelves, especially above beds. [[eq-roots]] [[ready-quake]]",
       "Keep sturdy shoes, a flashlight, and work gloves by each bed. Broken glass is common after shaking. [[ready-quake]]",
@@ -58,7 +58,7 @@
       { label: "University of Utah Seismograph Stations", src: "uuss" },
       { label: "UGS Geologic Hazards Portal", src: "ugs-portal" }
     ],
-    learn: ["fl-ground", "eq-roots", "ugs-eq", "eq-urm", "fl-brick", "fl-magna", "br-quake", "ready-quake"]
+    learn: ["fl-ground", "eq-roots", "ugs-eq", "eq-urm", "fl-brick", "fl-magna", "shakeout-ut", "ready-quake"]
   });
 
   H.push({
@@ -79,7 +79,7 @@
       "People who rely on daily prescriptions, especially controlled substances, which are excluded from Utah's pharmacist emergency-refill rule. [[utah-rx-refill]]"
     ],
     before: [
-      "Build a two-week \"stay home by choice\" supply: food you eat, water, medicines, and hygiene items. [[ready-pandemic]] [[br-pandemic]]",
+      "Build a two-week \"stay home by choice\" supply: food you eat, water, medicines, and hygiene items. [[ready-pandemic]]",
       "Keep a one-page medication list and refill on time. Ask your insurer about 90-day fills or mail order. [[utah-rx-refill]]",
       "Know your family's vaccination records. CDC says two MMR doses are 97% effective against measles. [[cdc-measles]]",
       "Stock a few NIOSH-approved N95s per person. Check the approval number on the NIOSH list; KN95s are not NIOSH-approved. [[niosh-cel]]",
@@ -112,7 +112,7 @@
       { label: "CDC respiratory illness data", src: "cdc-resp" },
       { label: "CDC bird flu situation", src: "cdc-birdflu" }
     ],
-    learn: ["ready-pandemic", "br-pandemic", "dhhs-plague", "dhhs-hanta", "niosh-cel", "fda-pulseox"]
+    learn: ["ready-pandemic", "dhhs-plague", "dhhs-hanta", "niosh-cel", "fda-pulseox"]
   });
 
   H.push({
@@ -206,6 +206,53 @@
       { label: "Rocky Mountain Power outages & shutoffs", src: "rmp-outages" }
     ],
     learn: ["br-fire", "ready-fire", "nfpa-hiz", "epa-cleanroom", "epa-diy", "wildfirerisk"]
+  });
+
+  H.push({
+    id: "heat", name: "Extreme heat", short: "Heat waves, cooling centers, hot cars, heat illness", icon: "heat", color: "#A8456B",
+    tagline: "Utah's heat records keep falling. The best protection is mostly free: a cool place to go, water, and checking on each other.",
+    summary: "Heat is a quiet hazard: no smoke and no shaking, but it sends people to the emergency room every summer. Salt Lake City hit 109&deg;F in July 2026, its hottest reading on record. Know where you'll cool off, learn the warning signs of heat illness, and look after the people most at risk. [[dn-slc-109]]",
+    why: [
+      "Salt Lake City reached 109&deg;F on July 12, 2026, its hottest temperature since records began in 1874. Logan hit at least 106&deg;F and Ogden tied its record of 106&deg;F the same day. [[dn-slc-109]]",
+      "Utah's record high is 117&deg;F at St. George, set in 1985 and tied in 2021. [[ncei-ut-117]]",
+      "Utah has warmed more than 2.5&deg;F since the early 1900s, and very warm nights have become much more common since 1990. [[ncics-ut]]",
+      "Arches, Canyonlands, Bryce Canyon, Capitol Reef, and Dinosaur National Monument had record-hot summers in 2026. An NPR and Boston University analysis estimates Utah's true heat death toll is more than twice what federal data show. [[kuer-heat-2026]]",
+      "Heat isn't spread evenly. A 2023 heat-mapping drive found the central and western Salt Lake Valley hotter than the east bench, parks, and the Jordan River corridor. [[nhmu-heat]]"
+    ],
+    who: [
+      "Adults 65 and older, infants and children, pregnant people, people with chronic conditions, and people without air conditioning. [[cdc-heat-risk]]",
+      "Outdoor workers and athletes. [[cdc-heat-risk]]",
+      "People who take certain medicines, including some for blood pressure, depression, and ADHD. Many medicines, even over-the-counter ones, make it harder for the body to handle heat. [[cdc-heat-meds]]",
+      "People who live alone, are socially isolated, or don't have housing. [[cdc-heat-clin]]"
+    ],
+    before: [
+      "Check the National Weather Service HeatRisk forecast in summer. It rates each of the next 7 days from 0 (little risk) to 4 (extreme). [[nws-heatrisk]]",
+      "Know where you'll cool off: a cooling center, a library, or a friend with air conditioning. In Salt Lake County, find a Cool Zone. Anywhere in Utah, dial 2-1-1 or text your ZIP code to 801-845-2211. [[slco-coolzones]] [[utah-211]] [[cdc-heat-about]]",
+      "Plan for heat and a power outage together. Heat can cause outages, so refrigerated medicines and electric medical devices need a backup plan. [[cdc-heat-about]]",
+      "Ask your pharmacist whether any of your medicines raise your heat risk. Never leave medicines in a hot car: inhalers can burst and epinephrine auto-injectors can fail. [[cdc-heat-meds]]",
+      "Set up hot-day check-ins with relatives and neighbors who live alone or have a chronic illness. [[cdc-heat-about]]",
+      "Never leave a child or a pet in a parked car, even for a minute. A child's body heats up 3 to 5 times faster than an adult's. [[nhtsa-heatstroke]] [[noheatstroke]]"
+    ],
+    during: [
+      "Stay in air conditioning when you can. Use fans only when it's below 90&deg;F indoors; above that, a fan can raise your body temperature instead of cooling you. [[cdc-heat-about]] [[epa-heat-iaq]]",
+      "Carry water and drink it, and go easy on sugary, caffeinated, and alcoholic drinks. Light-yellow or clear urine is a good sign. [[cdc-heat-about]]",
+      "<strong>Heat exhaustion</strong> looks like headache, nausea, dizziness, weakness, heavy sweating, and less urine than usual. Move to a cooler place, sip water if fully alert, and use cool compresses. Get medical help if the person vomits or symptoms last more than an hour. [[niosh-heat-ill]] [[nws-heat-illness]]",
+      "<strong>Heat stroke is an emergency.</strong> Watch for confusion, slurred speech, passing out, seizures, or a temperature above 103&deg;F. Call 911, cool the person fast with cold water or ice, and don't give them fluids. [[niosh-heat-ill]] [[nws-heat-illness]]",
+      "Keep pets off hot asphalt and dark pavement, which can burn their paws. [[ready-heat]]",
+      "Check on older adults in your care at least twice a day. [[cdc-heat-older]]"
+    ],
+    after: [
+      "After heat stroke or serious heat exhaustion, check with a doctor before heavy activity, and build back up over several weeks. [[medline-heat]]",
+      "If the power was out for more than a day, throw out medicine that needs refrigeration unless its label says otherwise, and ask your pharmacist about replacements. [[ready-power]]",
+      "Note what was hardest (sleep, a hot bedroom, medicines) and fix it before next summer."
+    ],
+    live: [
+      { label: "NWS HeatRisk forecast map", src: "nws-heatrisk" },
+      { label: "NWS Salt Lake City (heat warnings)", src: "nws-slc" },
+      { label: "Salt Lake County Cool Zones", src: "slco-coolzones" },
+      { label: "211 Utah (cooling help statewide)", src: "utah-211" }
+    ],
+    learn: ["cdc-heat-about", "ready-heat", "cdc-heat-risk", "nws-heat-illness", "epa-heat-iaq"]
   });
 
   H.push({
@@ -382,7 +429,7 @@
       "If someone relies on powered medical equipment, ask Rocky Mountain Power about its Medical Certificate program (a medical professional must complete the application). [[rmp-afn]]",
       "Install carbon monoxide alarms with battery backup, and test smoke alarms. [[ready-winter]]",
       "Keep flashlights for every household member, plus power banks and a battery or hand-crank radio. [[ready-power]] [[ready-kit]]",
-      "Winterize your car and keep an emergency kit in it, and check road conditions before you go. [[br-severe]]",
+      "Winterize your car and keep an emergency kit in it, and check road conditions before you go. [[ready-winter]]",
       "If you buy a generator, plan to run it only outdoors; connect it to home wiring only through a transfer switch installed by a licensed electrician. [[br-power]]"
     ],
     during: [
@@ -403,6 +450,58 @@
       { label: "NWS Salt Lake City (winter warnings)", src: "nws-slc" }
     ],
     learn: ["br-power", "ready-power", "ready-winter", "nws-winter", "rmp-afn", "cdc-generator"]
+  });
+
+  H.push({
+    id: "fire", name: "Home fire", short: "Smoke alarms, escape plans, cooking, heaters, batteries", icon: "homefire", color: "#B23A3A",
+    tagline: "Home fires are the disaster the Red Cross answers most often. Working smoke alarms and a practiced way out are what save lives.",
+    summary: "Most of the roughly 65,000 disasters the Red Cross responds to each year are home fires. Once a smoke alarm sounds, you may have only a minute or two to get out, so the plan has to be ready first: working alarms, two ways out of every room, and closed bedroom doors. [[redcross-disasters]] [[nfpa-escape]]",
+    why: [
+      "In 2024, U.S. home fires killed 2,920 people, three out of four of all U.S. fire deaths: one death every three hours. [[nfpa-loss-2024]]",
+      "Utah's fire death rate is lower than the nation's (7.6 vs. 13.1 deaths per million people in 2023), but 26 Utahns still died in fires that year. [[usfa-states]]",
+      "After a smoke alarm sounds, you may have as little as one or two minutes to escape. [[nfpa-escape]]",
+      "The death rate is about 60% lower in homes with working smoke alarms. In 59% of home fire deaths, there were no alarms or the alarms didn't work. [[nfpa-alarms-report]]",
+      "Cooking causes 44% of home fires, most often when it's left unattended. [[nfpa-cooking]]"
+    ],
+    who: [
+      "Older adults: people 65 and older are 2.5 times as likely to die in a fire as the general population, and people 85 and older 3.4 times. [[usfa-older]]",
+      "People who are deaf or hard of hearing, who may not wake to a standard alarm. Strobe alarms and bed or pillow shakers help. [[nfpa-alarms]]",
+      "Homes where someone smokes: smoking materials cause more home fire deaths than any other source. [[nfpa-home-fires]]",
+      "Homes heated with space heaters: portable heaters cause 3% of home heating fires but 41% of the deadly ones. [[usfa-heating]]",
+      "Anyone who needs extra time or help to get out, like people with limited mobility."
+    ],
+    before: [
+      "Put smoke alarms in every bedroom, outside each sleeping area, and on every level, including the basement. Interconnected alarms all sound when one does. [[nfpa-alarms]]",
+      "Test alarms every month and replace them every 10 years. [[usfa-alarms]]",
+      "Can't afford alarms? The American Red Cross installs up to three free smoke alarms in Utah homes; request a visit online. [[redcross-ut-hfc]]",
+      "Make an escape plan with two ways out of every room and a meeting place outside. Practice it twice a year, and aim to get everyone out in two minutes. [[nfpa-escape]] [[redcross-ut-hfc]]",
+      "Sleep with bedroom doors closed. In fire tests, rooms behind closed doors stayed under 100&deg;F while rooms with open doors topped 1,000&deg;F. [[fsri-close]]",
+      "Stay with your cooking. Keep anything that can burn at least 3 feet from heaters, and turn space heaters off when you leave the room or go to bed. [[nfpa-cooking]] [[usfa-heating]]",
+      "Keep the dryer's lint filter and vent clean; failure to clean is the leading factor in dryer fires. Don't plug major appliances into extension cords. [[usfa-dryer]]",
+      "Charge e-bikes and scooters on a hard surface away from exits, never while you sleep or are away. Stop using any lithium-ion battery that smells, changes color, or gets too hot. [[ut-sfm-home]] [[cpsc-ebike]] [[usfa-batteries]]",
+      "Keep candles 12 inches from anything that can burn, and never smoke in bed. [[ut-sfm-home]]",
+      "Keep a fire extinguisher and learn PASS: Pull the pin, Aim low, Squeeze, Sweep. Use it only on a small, contained fire with a clear way out. [[usfa-extinguisher]]"
+    ],
+    during: [
+      "Get out, stay out, and call 911 from outside. [[redcross-fire-starts]]",
+      "Get low and go under the smoke, closing doors behind you. [[redcross-fire-starts]]",
+      "Never open a door that's warm to the touch; use your second way out. [[redcross-fire-starts]]",
+      "If you're trapped, close the door, put a wet towel under it, call 911, and wave a cloth or flashlight at the window. [[redcross-fire-starts]]",
+      "If your clothes catch fire, stop, drop, and roll, then cool the burn with water for 3 to 5 minutes. [[redcross-fire-starts]]",
+      "Never go back inside. Tell the dispatcher or firefighters if someone is missing. [[nfpa-escape]]"
+    ],
+    after: [
+      "Stay out until fire officials say it's safe, and don't turn utilities back on yourself. [[redcross-fire-recovery]] [[usfa-after-fire]]",
+      "Call your insurance company right away, and save every receipt for your claim and your taxes. [[usfa-after-fire]]",
+      "The Red Cross can help with food, clothing, medicine, and a place to stay. [[usfa-after-fire]] [[redcross-fire-recovery]]",
+      "Replace lost documents such as driver's licenses, passports, birth certificates, and Social Security cards. [[usfa-after-fire]]"
+    ],
+    liveTitle: "Get help", liveNote: "Free alarms and official fire-safety advice.",
+    live: [
+      { label: "Request free smoke alarms (Red Cross, Utah)", src: "redcross-ut-hfc" },
+      { label: "Utah State Fire Marshal: home fire safety", src: "ut-sfm-home" }
+    ],
+    learn: ["nfpa-escape", "nfpa-alarms", "usfa-alarms", "fsri-close", "usfa-heating", "usfa-after-fire"]
   });
 
   H.push({

@@ -194,6 +194,30 @@ select:focus, input:focus { border-color: var(--blue-2); }
 .stepper input { width: 64px; text-align: center; padding: 8px 4px; }
 .q-nav { display: flex; justify-content: space-between; gap: 10px; margin-top: 28px; position: sticky; bottom: 0; background: linear-gradient(transparent, var(--bg) 30%); padding: 18px 0 12px; }
 .q-error { color: #8A1F11; font-weight: 600; margin-top: 8px; min-height: 1.4em; }
+.reveal { margin: -2px 0 6px; padding: 12px 0 6px 16px; border-left: 3px solid var(--blue-light); }
+.reveal[hidden] { display: none; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.choice.chip span.box { min-height: 40px; padding: 8px 12px; gap: 8px; }
+.choice.chip span.box::before { width: 18px; height: 18px; margin-top: 1px; }
+.text-input { width: 100%; min-height: 48px; padding: 10px 14px; border: 1.5px solid #D6C6AB; border-radius: 12px; background: #fff; font: inherit; color: var(--ink); }
+.text-input:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; border-color: var(--blue-2); }
+.detect { color: var(--sage-dark); font-weight: 600; margin: 8px 0 0; min-height: 1.3em; }
+.first-hour { border: 2px solid var(--gold); }
+.alerts-card h3 { margin-bottom: .3em; }
+.alerts-card .alerts-main { margin: 0; font-size: 1.05rem; }
+.alerts-card .icon { color: var(--rock-dark); }
+.alerts-card .btn .icon { color: inherit; }
+.alert-steps { padding-left: 1.3em; }
+.alert-steps li { margin: 0 0 .7em; }
+.rsg summary { cursor: pointer; font-weight: 650; color: var(--blue); margin-top: 6px; }
+.rsg dl, .rsg-list { margin: 8px 0 0; }
+.rsg dt, .rsg-list dt { font-weight: 700; color: var(--blue); margin-top: 8px; }
+.rsg dd, .rsg-list dd { margin: 2px 0 0; }
+.county-list { display: grid; gap: 12px; }
+.county-list .alerts-card { scroll-margin-top: 90px; }
+select[data-jump] { width: 100%; max-width: 360px; }
+.first-hour h2 { display: flex; align-items: center; gap: 10px; margin-bottom: .3em; }
+.fh-list { margin-top: 10px; }
 .privacy-note { display: flex; gap: 10px; align-items: flex-start; font-size: .9rem; color: var(--muted); background: var(--card); border: 1px dashed var(--line); border-radius: 12px; padding: 12px 14px; }
 
 /* --- dashboard --- */

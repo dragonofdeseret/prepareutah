@@ -49,7 +49,7 @@ li { margin: .35em 0; }
 .site-nav a { display: block; padding: 12px 6px; text-decoration: none; color: var(--ink); font-weight: 600; border-bottom: 1px solid var(--bg-2); }
 .site-nav a[aria-current="page"] { color: var(--rock-dark); }
 .site-nav .cta { background: var(--blue); color: #fff; border-radius: 999px; text-align: center; margin-top: 10px; border: 0; }
-@media (min-width: 880px) {
+@media (min-width: 1040px) {
   .nav-toggle { display: none; }
   .site-nav, .site-nav.open { display: block; position: static; box-shadow: none; border: 0; background: none; }
   .site-nav ul { display: flex; gap: 4px; padding: 0; align-items: center; }
@@ -335,3 +335,39 @@ details.action .inner { padding: 0 14px 14px; }
   .q-step[data-step="6"] .choice small { display: none; }
   .q-step[data-step="6"] .choice span.box { align-items: center; }
 }
+
+/* --- guides and guide tools (family plan, neighborhood worksheet) --- */
+.guide-body > h2 { margin-top: 28px; }
+.tool-form { margin: 8px 0 20px; }
+.tool-form h2 { font-size: 1.25rem; margin: 22px 0 8px; }
+.tool-rows, .tool-grid { display: grid; gap: 10px; }
+.tool-row { border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px 12px; display: grid; gap: 8px; margin: 0; min-width: 0; }
+.tool-row legend { font-weight: 700; font-size: .88rem; color: var(--muted); padding: 0 4px; margin: 0; }
+@media (min-width: 640px) { .tool-row, .tool-grid { grid-template-columns: 1fr 1fr; } }
+.tool-field { display: block; }
+.tool-field > span { display: block; font-weight: 600; font-size: .92rem; margin-bottom: 4px; }
+.tool-field small { font-weight: 400; color: var(--muted); }
+.tool-table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: .9rem; }
+.tool-table th { text-align: left; padding: 6px; border-bottom: 2px solid var(--line); }
+.tool-table td { padding: 4px; border-bottom: 1px solid var(--bg-2); }
+.tool-table .text-input { min-height: 38px; padding: 6px 8px; border-radius: 8px; }
+.tool-table input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--sage-dark); }
+.reminder-list { padding-left: 1.2em; }
+.reminder-list li { margin: 0 0 .4em; }
+.wallet-sheet { display: none; }
+@media print {
+  body.print-cards .hz-hero, body.print-cards .hz-aside, body.print-cards .site-footer, body.print-cards .guide-body > :not(.wallet-sheet) { display: none !important; }
+  body.print-cards .wallet-sheet { display: block; }
+  body.print-cards .hz-body { display: block; padding: 0; }
+  .wc-help { font-size: 9pt; margin: 0 0 .15in; }
+  .wallet-card { width: 6.75in; height: 2.125in; display: flex; border: 1px dashed #777; margin: 0 0 .2in; break-inside: avoid; font: 7.2pt/1.25 var(--sans); color: #000; }
+  .wallet-card .wc-side { width: 50%; padding: .07in .12in; overflow: hidden; }
+  .wallet-card .wc-side + .wc-side { border-left: 1px dashed #777; }
+  .wallet-card p, .wallet-card ul { margin: 0 0 2px; }
+  .wallet-card ul { padding-left: 1.1em; }
+  .wallet-card .wc-title { font: 700 8.5pt var(--serif); margin-bottom: 3px; }
+  .wallet-card .wc-foot { margin-top: 3px; color: #555; }
+  .tool-form .text-input { border: 0; border-bottom: 1px solid #999; border-radius: 0; min-height: 0; padding: 2px 0; }
+}
+/* Grid columns may not grow past the screen; wide tables scroll inside .table-wrap instead. */
+.hz-body > * { min-width: 0; }

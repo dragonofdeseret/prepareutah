@@ -2,22 +2,50 @@
    Content lives in site/assets/js/*.js and is shared with the browser. Output: *.html in site/. */
 const fs = require("fs"), path = require("path");
 const ROOT = path.resolve(__dirname, "..", "site");
-["sources", "hazards", "planner", "icons", "render", "alerts"].forEach(f => require(path.join(ROOT, "assets/js", f + ".js")));
+["sources", "hazards", "planner", "icons", "render", "alerts", "guides"].forEach(f => require(path.join(ROOT, "assets/js", f + ".js")));
 const UR = globalThis.UR;
 const ic = UR.icon, cite = UR.cite, esc = UR.esc;
 const NAME = "Prepare Utah";
 const SITE = "https://prepareutah.com/";
-const VERSION = "2026-10-22b";
+const VERSION = "2026-10-24";
 // Sister site. Linked from the footer, home page, earthquake page, Sources and About.
 const SISTER = { name: "FaultLine Utah", url: "https://faultlineutah.com/" };
 const ext = (href, text) => `<a href="${href}" target="_blank" rel="noopener">${text}<span class="sr-only"> (opens in a new tab)</span></a>`;
 
-function layout({ rel, title, desc, root = "", active = "", body, scripts = [], page = "" }) {
-  const nav = [["index.html", "Home", "home"], ["start.html", "Make my plan", "start"], ["hazards/index.html", "Hazards", "hazards"], ["alerts.html", "Alerts", "alerts"], ["sources.html", "Sources", "sources"], ["about.html", "About", "about"]];
-  const navHtml = nav.map(([href, label, id]) => `<li><a href="${root}${href}"${active === id ? ' aria-current="page"' : ""}${id === "start" ? ' class="cta"' : ""}>${label}</a></li>`).join("");
+// Words in the page frame. Only the Spanish essentials page uses "es" so far; everything else is English.
+const T = {
+  en: {
+    skip: "Skip to main content", menu: "Menu", tagline: "Utah household readiness", home: `${NAME} home`,
+    strip: root => `<strong>In an emergency, call 911.</strong> Education and preparedness only; not medical, engineering, or legal advice. <a href="${root}es/index.html" lang="es" hreflang="es">En español</a>`,
+    nav: ["Home", "Make my plan", "Hazards", "Guides", "Alerts", "Sources", "About"],
+    disclaimer: `<p><strong>For education and preparedness only.</strong> Not medical, engineering, legal, insurance, or financial advice, and not an official alert or risk rating. Hazard priorities are general guidance. <strong>In an emergency, call 911.</strong> For health questions, contact your clinician or local health department. For your building, consult a licensed professional.</p>
+          <p style="margin:0">Not affiliated with the State of Utah or its <a href="https://beready.utah.gov/" target="_blank" rel="noopener">Be Ready Utah</a> program, which we recommend.</p>`,
+    explore: "Explore", links: ["Make my plan", "My plan", "All hazards", "Guides", "Alerts by county", "Sources", "About &amp; privacy"],
+    sister: "Sister site", sisterText: "earthquake hazards for any Utah address, in plain language.",
+    data: "Your data", dataText: "Your answers stay in this browser (localStorage). No accounts, no tracking, no analytics.", erase: "Erase my data",
+    fine: `Content checked ${esc(UR.SOURCES_CHECKED)}. Every factual claim links to its source; items marked <em>(estimate)</em> are planning guesses and items in [brackets] are not yet verified.`
+  },
+  es: {
+    skip: "Saltar al contenido principal", menu: "Menú", tagline: "Preparación para hogares de Utah", home: `${NAME}: inicio`,
+    strip: root => `<strong>En una emergencia, llame al 911.</strong> Solo para educación y preparación; no es asesoría médica, de ingeniería ni legal. <a href="${root}index.html" lang="en" hreflang="en">In English</a>`,
+    nav: ["Inicio", "Hacer mi plan", "Peligros", "Guías", "Alertas", "Fuentes", "Acerca de"],
+    disclaimer: `<p><strong>Solo para educación y preparación.</strong> No es asesoría médica, de ingeniería, legal, de seguros ni financiera, ni una alerta o clasificación de riesgo oficial. <strong>En una emergencia, llame al 911.</strong> Para preguntas de salud, consulte a su médico o al departamento de salud local.</p>
+          <p style="margin:0">No está afiliado al Estado de Utah ni a su programa <a href="https://beready.utah.gov/" target="_blank" rel="noopener">Be Ready Utah</a>, que recomendamos.</p>`,
+    explore: "Explorar (en inglés)", links: ["Hacer mi plan", "Mi plan", "Peligros", "Guías", "Alertas por condado", "Fuentes", "Acerca de y privacidad"],
+    sister: "Sitio hermano", sisterText: "riesgos de terremoto para cualquier dirección de Utah (en inglés).",
+    data: "Sus datos", dataText: "Sus respuestas se quedan en este navegador. Sin cuentas, sin rastreo, sin análisis.", erase: "Borrar mis datos",
+    fine: `Contenido revisado el ${esc(UR.SOURCES_CHECKED)} (en inglés). Cada dato enlaza a su fuente.`
+  }
+};
+
+function layout({ rel, title, desc, root = "", active = "", body, scripts = [], page = "", lang = "en", alternates = null }) {
+  const t = T[lang];
+  const nav = [["index.html", "home"], ["start.html", "start"], ["hazards/index.html", "hazards"], ["guides/index.html", "guides"], ["alerts.html", "alerts"], ["sources.html", "sources"], ["about.html", "about"]];
+  const navHtml = nav.map(([href, id], i) => `<li><a href="${root}${href}"${active === id ? ' aria-current="page"' : ""}${id === "start" ? ' class="cta"' : ""}>${t.nav[i]}</a></li>`).join("");
+  const footLinks = ["start.html", "plan.html", "hazards/index.html", "guides/index.html", "alerts.html", "sources.html", "about.html"].map((href, i) => `<li><a href="${root}${href}">${t.links[i]}</a></li>`).join("");
   const url = rel && rel !== "404.html" ? SITE + rel.replace(/(^|\/)index\.html$/, "$1") : "";
   return `<!doctype html>
-<html lang="en">
+<html lang="${lang}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -30,20 +58,21 @@ function layout({ rel, title, desc, root = "", active = "", body, scripts = [], 
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="${NAME}">` : ""}
+<meta property="og:site_name" content="${NAME}">` : ""}${alternates ? Object.entries(alternates).map(([l, href]) => `
+<link rel="alternate" hreflang="${l}" href="${SITE}${href}">`).join("") : ""}
 <link rel="icon" href="${root}assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="${root}assets/css/style.css?v=${VERSION}">
 </head>
 <body data-page="${page}">
-<a class="skip" href="#main">Skip to main content</a>
-<div class="strip" role="note"><strong>In an emergency, call 911.</strong> Education and preparedness only; not medical, engineering, or legal advice.</div>
+<a class="skip" href="#main">${t.skip}</a>
+<div class="strip" role="note">${t.strip(root)}</div>
 <header class="site-header">
   <div class="wrap">
-    <a class="brand" href="${root}index.html" aria-label="${NAME} home">
+    <a class="brand" href="${root}index.html" aria-label="${t.home}">
       <span class="logo">${ic("hive")}</span>
-      <span><b>${NAME}</b><small>Utah household readiness</small></span>
+      <span><b>${NAME}</b><small>${t.tagline}</small></span>
     </a>
-    <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">${ic("list")} Menu</button>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">${ic("list")} ${t.menu}</button>
     <nav id="site-nav" class="site-nav" aria-label="Main"><ul>${navHtml}</ul></nav>
   </div>
 </header>
@@ -56,23 +85,22 @@ ${body}
       <div class="disclaimer-col">
         <h2>${NAME}</h2>
         <div class="disclaimer">
-          <p><strong>For education and preparedness only.</strong> Not medical, engineering, legal, insurance, or financial advice, and not an official alert or risk rating. Hazard priorities are general guidance. <strong>In an emergency, call 911.</strong> For health questions, contact your clinician or local health department. For your building, consult a licensed professional.</p>
-          <p style="margin:0">Not affiliated with the State of Utah or its <a href="https://beready.utah.gov/" target="_blank" rel="noopener">Be Ready Utah</a> program, which we recommend.</p>
+          ${t.disclaimer}
         </div>
       </div>
       <div>
-        <h2>Explore</h2>
-        <ul><li><a href="${root}start.html">Make my plan</a></li><li><a href="${root}plan.html">My plan</a></li><li><a href="${root}hazards/index.html">All hazards</a></li><li><a href="${root}alerts.html">Alerts by county</a></li><li><a href="${root}sources.html">Sources</a></li><li><a href="${root}about.html">About &amp; privacy</a></li></ul>
-        <h2 style="margin-top:18px">Sister site</h2>
-        <p class="small" style="margin:0">${ext(SISTER.url, SISTER.name)}: earthquake hazards for any Utah address, in plain language.</p>
+        <h2>${t.explore}</h2>
+        <ul>${footLinks}</ul>
+        <h2 style="margin-top:18px">${t.sister}</h2>
+        <p class="small" style="margin:0">${ext(SISTER.url, SISTER.name)}: ${t.sisterText}</p>
       </div>
       <div>
-        <h2>Your data</h2>
-        <p class="small">Your answers stay in this browser (localStorage). No accounts, no tracking, no analytics.</p>
-        <button class="erase" type="button" data-erase>${ic("trash")} Erase my data</button>
+        <h2>${t.data}</h2>
+        <p class="small">${t.dataText}</p>
+        <button class="erase" type="button" data-erase>${ic("trash")} ${t.erase}</button>
       </div>
     </div>
-    <p class="fine">Content checked ${esc(UR.SOURCES_CHECKED)}. Every factual claim links to its source; items marked <em>(estimate)</em> are planning guesses and items in [brackets] are not yet verified.</p>
+    <p class="fine">${t.fine}</p>
   </div>
 </footer>
 ${["sources", "hazards", "planner", "icons", "render", "common"].concat(scripts).map(s => `<script src="${root}assets/js/${s}.js?v=${VERSION}"></script>`).join("\n")}
@@ -101,6 +129,10 @@ function sisterCard() {
 </div>`;
 }
 
+function guideCard(g, root) {
+  return `<a class="card hazard-card" href="${root}guides/${g.id}.html"><span class="hz-icon" style="background:${g.color}">${ic(g.icon)}</span><span><h3>${esc(g.name)}</h3><p>${esc(g.short)}</p></span></a>`;
+}
+
 function hazardCard(h, root) {
   return `<a class="card hazard-card" href="${root}hazards/${h.id}.html"><span class="hz-icon" style="background:${h.color}">${ic(h.icon)}</span><span><h3>${esc(h.name)}</h3><p>${esc(h.short)}</p></span></a>`;
 }
@@ -109,7 +141,7 @@ function hazardCard(h, root) {
 emit("index.html", {
   title: `${NAME} · A personalized preparedness plan for Utah households`,
   desc: "Answer a few questions about your Utah home and household and get a calm, sourced, personalized plan for earthquakes, wildfire, outbreaks, drought, air quality, floods, and more.",
-  active: "home", page: "home", scripts: ["quakes"],
+  active: "home", page: "home", scripts: ["quakes"], alternates: { en: "", es: "es/" },
   body: `
 <section class="hero">
   <div class="wrap">
@@ -144,10 +176,18 @@ emit("index.html", {
 </section>
 <section class="block alt">
   <div class="wrap">
-    <span class="eyebrow">${["", "", "", "", "", "", "", "", "", "", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen"][UR.hazards.length - 1] || UR.hazards.length - 1} hazards plus money</span>
+    <span class="eyebrow">${["", "", "", "", "", "", "", "", "", "", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen"][UR.hazards.length - 1] || UR.hazards.length - 1} hazards plus money</span>
     <h2>Every Utah hazard, one calm place</h2>
     <p class="muted">Each page stands on its own: why it matters in Utah, who's most affected, what to do before, during, and after, and where to check live conditions.</p>
     <div class="grid three">${UR.hazards.map(h => hazardCard(h, "")).join("")}</div>
+  </div>
+</section>
+<section class="block">
+  <div class="wrap">
+    <span class="eyebrow">Guides</span>
+    <h2>Beyond any one hazard</h2>
+    <p class="muted">Insurance, food storage, when to leave, what to do afterward, and plans for your family and your neighbors.</p>
+    <div class="grid three">${UR.guides.map(g => guideCard(g, "")).join("")}</div>
   </div>
 </section>
 <section class="block">
@@ -306,6 +346,149 @@ emit("hazards/index.html", {
   title: `Utah hazards · ${NAME}`, desc: "Plain-language, sourced guides to every major Utah hazard.", root: "../", active: "hazards", page: "hazards",
   body: `<section class="hz-hero"><div class="wrap"><span class="eyebrow">Hazard guides</span><h1>Utah hazards, one at a time</h1><p class="lede" style="max-width:44em">Each guide stands on its own: why it matters here, who's most affected, what to do before, during, and after, and links to live official conditions. Want it all sized to your household? <a href="../start.html">Make your plan</a>.</p></div></section>
 <section class="block"><div class="wrap"><div class="grid three">${UR.hazards.map(h => hazardCard(h, "../")).join("")}</div></div></section>`
+});
+
+// ---------------- interactive guide tools (saved only in this browser by assets/js/tools.js)
+const field = (name, label, type = "text", hint = "") => `<label class="tool-field"><span>${label}${hint ? ` <small>${hint}</small>` : ""}</span><input class="text-input" type="${type}" name="${name}" autocomplete="off"></label>`;
+const keepNote = `<div class="privacy-note no-print">${ic("lock")}<span>What you type is saved only in this browser, so you can come back and print again. It's never sent anywhere, and "Erase my data" removes it.</span></div>`;
+const TOOLS = {
+  "family-plan": () => `
+<form class="tool-form card" data-store="ur.familyPlan" data-tool="family-plan" autocomplete="off">
+  ${keepNote}
+  <h2>Who's at home</h2>
+  <div class="tool-rows">${[1, 2, 3, 4, 5, 6].map(i => `<fieldset class="tool-row"><legend>Person ${i}</legend>${field(`m${i}.name`, "Name")}${field(`m${i}.phone`, "Cell phone", "tel")}${field(`m${i}.where`, "Work, school, or child care")}${field(`m${i}.med`, "Allergies or medical needs")}</fieldset>`).join("")}</div>
+  <h2>Out-of-area contact</h2>
+  <p class="hint">Someone outside your area that everyone checks in with, since long-distance calls and texts may get through when local ones don't.</p>
+  <div class="tool-grid">${field("contact.name", "Name")}${field("contact.phone", "Phone", "tel")}${field("contact.email", "Email", "email")}</div>
+  <h2>Meeting places</h2>
+  <div class="tool-grid">${field("meet.home", "Right outside home", "text", "for a fire")}${field("meet.near", "In your neighborhood")}${field("meet.out", "Outside your neighborhood", "text", "if you can't get home")}${field("meet.town", "Out of town", "text", "if you have to evacuate")}</div>
+  <h2>Important numbers</h2>
+  <div class="tool-grid">${field("num.doctor", "Doctor")}${field("num.pharmacy", "Pharmacy")}${field("num.vet", "Veterinarian")}${field("num.insurance", "Insurance company and policy number")}${field("num.power", "Power company")}${field("num.gas", "Gas company")}${field("num.other", "Other")}</div>
+  <div class="btn-row no-print" style="margin-top:18px"><button type="button" class="btn" data-cards>${ic("print")} Print wallet cards</button><button type="button" class="btn secondary" data-print>Print the full plan</button><button type="button" class="btn small danger" data-clear>${ic("trash")} Clear this form</button></div>
+  <p class="small muted no-print" data-saved aria-live="polite" style="margin:10px 0 0"></p>
+</form>
+<div class="wallet-sheet" data-wallet></div>`,
+  "neighbors": () => `
+<form class="tool-form card" data-store="ur.neighbors" autocomplete="off">
+  ${keepNote}
+  <h2>Our gathering place</h2>
+  <div class="tool-grid">${field("gather", "Where neighbors meet after a disaster", "text", "a driveway, park, or church parking lot")}${field("leader", "Who keeps this list")}</div>
+  <h2>Neighbors</h2>
+  <div class="table-wrap"><table class="tool-table"><thead><tr><th>Name</th><th>Address or unit</th><th>Phone</th><th>Skills</th><th>Equipment</th><th>May need help</th></tr></thead><tbody>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => `<tr>${["name", "addr", "phone", "skills", "gear"].map(k => `<td><input class="text-input" type="${k === "phone" ? "tel" : "text"}" name="n${i}.${k}" aria-label="Neighbor ${i}: ${{ name: "name", addr: "address or unit", phone: "phone", skills: "skills", gear: "equipment" }[k]}"></td>`).join("")}<td><input type="checkbox" name="n${i}.help" aria-label="Neighbor ${i} may need help"></td></tr>`).join("")}</tbody></table></div>
+  <h2>Gas meters and shutoffs</h2>
+  <div class="tool-grid">${field("gas", "Where each home's gas meter is, and who has a wrench")}${field("water", "Where each home's main water shutoff is")}</div>
+  <div class="btn-row no-print" style="margin-top:18px"><button type="button" class="btn" data-print>${ic("print")} Print the worksheet</button><button type="button" class="btn small danger" data-clear>${ic("trash")} Clear this form</button></div>
+  <p class="small muted no-print" data-saved aria-live="polite" style="margin:10px 0 0"></p>
+</form>`
+};
+
+// ---------------- guides
+UR.guides.forEach(g => {
+  const others = UR.guides.filter(o => o.id !== g.id);
+  const body = `
+<section class="hz-hero"><div class="wrap">
+  <p class="small" style="margin:0 0 10px"><a href="index.html">${ic("back")} All guides</a></p>
+  <div class="head"><span class="hz-icon" style="background:${g.color}">${ic(g.icon)}</span><h1>${esc(g.name)}</h1></div>
+  <p class="lede" style="font-size:1.12rem;max-width:46em">${cite(g.tagline)}</p>
+  <div class="btn-row no-print">${g.tool ? "" : `<a class="btn small" href="../start.html">Make my plan ${ic("arrow")}</a>`}<button class="btn small secondary" type="button" data-print>${ic("print")} Print this page</button></div>
+</div></section>
+<div class="wrap hz-body">
+  <div class="guide-body">
+    ${g.summary ? `<p style="font-size:1.05rem">${cite(g.summary)}</p>` : ""}
+    ${g.tool ? TOOLS[g.tool]() : ""}
+    ${g.sections.map(s => `<h2${s.id ? ` id="${s.id}"` : ""}>${esc(s.title)}</h2>${s.intro ? `<p>${cite(s.intro)}</p>` : ""}${s.items ? list(s.items) : ""}`).join("\n    ")}
+  </div>
+  <aside class="hz-aside">
+    ${g.help ? `<div class="card"><h3>${ic("live")} Where to get help</h3><ul class="live-list">${g.help.map(l => `<li><a href="${esc(UR.sources[l.src].url)}" target="_blank" rel="noopener"><span class="dot" aria-hidden="true"></span>${esc(l.label)}<span class="sr-only"> (opens in a new tab)</span></a></li>`).join("")}</ul></div>` : ""}
+    <div class="card"${g.help ? ' style="margin-top:14px"' : ""}>
+      <h3>Learn more</h3>
+      <ul class="small">${g.learn.map(id => `<li><a href="${esc(UR.sources[id].url)}" target="_blank" rel="noopener">${esc(UR.sources[id].title)}</a> <span class="muted">(${esc(UR.sources[id].pub)})</span></li>`).join("")}</ul>
+    </div>
+    <div class="card no-print" style="margin-top:14px">
+      <h3>Other guides</h3>
+      <ul class="small">${others.map(o => `<li><a href="${o.id}.html">${esc(o.name)}</a></li>`).join("")}</ul>
+    </div>
+  </aside>
+</div>`;
+  emit(`guides/${g.id}.html`, { title: `${g.name} · ${NAME}`, desc: g.tagline.replace(/<[^>]+>|\[\[[^\]]+\]\]/g, "").trim(), root: "../", active: "guides", page: "guide", body, scripts: g.tool ? ["tools"] : [] });
+});
+emit("guides/index.html", {
+  title: `Guides · ${NAME}`, desc: "Plain-language guides to insurance, food storage, evacuating, recovering, and planning with your family and neighbors in Utah.", root: "../", active: "guides", page: "guides",
+  body: `<section class="hz-hero"><div class="wrap"><span class="eyebrow">Guides</span><h1>Guides for every household</h1><p class="lede" style="max-width:44em">The things that matter in every kind of emergency: paying for it, feeding everyone, deciding when to leave, getting back on your feet, and planning with the people around you.</p></div></section>
+<section class="block"><div class="wrap"><div class="grid three">${UR.guides.map(g => guideCard(g, "../")).join("")}</div></div></section>
+<section class="block alt"><div class="wrap">
+  <span class="eyebrow">Beyond your household</span>
+  <h2>For businesses, schools, and communities</h2>
+  <p class="muted" style="max-width:46em">Prepare Utah is for households. The State of Utah's Be Ready Utah program has guidance for everyone else, and it's the place to find volunteer training near you.</p>
+  <div class="grid two">${UR.beyond.map(b => `<a class="card hazard-card" href="${esc(UR.sources[b.src].url)}" target="_blank" rel="noopener"><span class="hz-icon" style="background:#5B6F8A">${ic(b.icon)}</span><span><h3>${esc(b.name)}</h3><p>${esc(b.text)}</p></span><span class="sr-only"> (opens in a new tab)</span></a>`).join("")}</div>
+</div></section>`
+});
+
+// ---------------- Spanish essentials (translated here; pending review by a native speaker)
+const esLi = arr => `<ul>${arr.map(s => `<li>${cite(s)}</li>`).join("")}</ul>`;
+const esRes = groups => groups.map(([h, ids]) => `<h3>${h}</h3><ul class="small">${ids.map(id => `<li><a href="${esc(UR.sources[id].url)}" target="_blank" rel="noopener">${esc(UR.sources[id].title)}</a> <span class="muted">(${esc(UR.sources[id].short || UR.sources[id].pub)})</span></li>`).join("")}</ul>`).join("");
+emit("es/index.html", {
+  lang: "es", root: "../", page: "es", alternates: { en: "", es: "es/" },
+  title: `Prepárese en Utah · ${NAME}`,
+  desc: "Lo esencial para prepararse en Utah, en español: alertas de emergencia por condado, primeros pasos gratis y recursos oficiales en español.",
+  body: `<section class="hz-hero"><div class="wrap"><span class="eyebrow">En español</span><h1>Prepárese para emergencias en Utah</h1>
+<p class="lede" style="max-width:46em">Lo más importante para su hogar: cómo recibir alertas, qué hacer en la primera hora y dónde encontrar información oficial en español. Por ahora, el plan personalizado de Prepare Utah está solo en inglés.</p>
+<div class="note warm" style="max-width:46em"><strong>Traducción en revisión.</strong> Prepare Utah tradujo esta página, y todavía la está revisando una persona hispanohablante. Si algo no está claro, consulte los recursos oficiales en español de esta página.</div></div></section>
+<section class="block"><div class="wrap hz-body">
+<div>
+  <h2>1. Reciba alertas de emergencia</h2>
+  ${esLi([
+    "En Utah, la mayoría de las alertas locales requieren inscripción: las órdenes de evacuación y de hervir el agua llegan a quienes se inscribieron. Inscriba el celular de cada adulto de su hogar. [[kutv-alerts-2026]] [[dem-be-informed]]",
+    "Busque el enlace de su condado en la <a href=\"../alerts.html\">página de alertas por condado</a> (en inglés). Al inscribirse, busque la opción de idioma: los formularios de AlertSense, que usan condados como Beaver y Carbon, permiten elegir el español. [[alertsense-lang]]",
+    "Mantenga activadas las alertas de emergencia del celular: llegan según su ubicación, gratis y sin inscripción. En iPhone: Ajustes, Notificaciones, Alertas gubernamentales. En Android: Ajustes, Notificaciones, Alertas de emergencia inalámbricas (el menú cambia según el teléfono). [[ready-es-alertas]] [[apple-alerts]] [[android-alerts]]",
+    "Las reglas federales exigen que las compañías de celulares transmitan correctamente las alertas en español cuando las autoridades las envían en español. [[fcc-wea-es]]",
+    "En el condado de Summit hay un canal de WhatsApp en español para avisos del condado. [[summit-notify]]",
+    "En 2021, las órdenes de evacuación del incendio de Parleys Canyon llegaron solo en inglés. Si recibe una alerta que no entiende, pida ayuda a un vecino o llame al 2-1-1. [[kuer-es-parleys]] [[utah-211]]"
+  ])}
+  <h3>Los tres niveles de evacuación (Ready, Set, Go)</h3>
+  <dl class="rsg-list">
+    <dt>Ready (nivel 1: listos)</dt><dd>${cite("Existe una posible amenaza. Repase su plan y tenga lista su mochila de emergencia, a su familia y a sus mascotas. [[northfork-rsg]]")}</dd>
+    <dt>Set (nivel 2: prepárense)</dt><dd>${cite("Hay una amenaza importante, y es posible que tenga que salir con poco aviso. Si necesita más tiempo para salir o tiene animales grandes, considere irse ya. [[northfork-rsg]]")}</dd>
+    <dt>Go (nivel 3: váyanse)</dt><dd>${cite("El peligro es actual o inminente. Salga de inmediato. [[northfork-rsg]]")}</dd>
+  </dl>
+  <h2 style="margin-top:28px">2. Su primera hora: pasos gratis</h2>
+  <ol class="alert-steps">${[
+    "Active las alertas de emergencia del celular e inscríbase en las alertas de su condado (10 minutos).",
+    "Elija dos lugares de reunión, uno cerca de casa y otro fuera de su vecindario, y un contacto fuera del área. Envíelos por mensaje de texto a todos en casa (15 minutos). [[ready-es-plan]]",
+    "Presione el botón de prueba de cada alarma de humo. Cambie las que no suenen o que tengan más de 10 años (5 minutos). [[usfa-alarms]]",
+    "Ubique las llaves de paso del gas, el agua y la electricidad. Si renta, pregúntele al dueño (10 minutos). [[br-fire]]",
+    "Empiece su reserva de agua: llene botellas limpias con agua de la llave. Calcule 1 galón por persona al día (10 minutos). [[br-water]]",
+    "Guarde en su celular el número del Centro de Control de Envenenamientos de Utah: 1-800-222-1222 (5 minutos). [[utah-poison]]"
+  ].map(s => `<li>${cite(s)}</li>`).join("")}</ol>
+  <h2 style="margin-top:28px">3. Riesgos importantes en Utah</h2>
+  <h3>Incendio en casa</h3>
+  ${esLi(["Si hay un incendio, salga, quédese afuera y llame al 911. Duerma con las puertas de las habitaciones cerradas. [[redcross-es-fuego]] [[fsri-close]]", "La Cruz Roja instala hasta tres alarmas de humo gratis en hogares de Utah, y puede pedir la visita en español. [[redcross-ut-hfc]] [[redcross-es-alarma]]"])}
+  <h3>Calor extremo</h3>
+  ${esLi(["Nunca deje a un niño ni a una mascota en un carro estacionado. [[nhtsa-heatstroke]]", "Si hace más de 90 °F dentro de la casa, un ventilador no basta: vaya a un lugar con aire acondicionado. Para encontrar un lugar fresco, llame al 2-1-1. [[cdc-heat-es]] [[cdc-heat-about]] [[utah-211]]"])}
+  <h3>Terremotos</h3>
+  ${esLi(["Agáchese, cúbrase y agárrese hasta que deje de temblar. [[ready-es-terremotos]]", "La guía de Utah sobre terremotos, “Echando raíces en tierra de terremotos”, está en español. [[ugs-roots-es]]"])}
+  <h3>Agua</h3>
+  ${esLi(["Si su sistema de agua ordena hervirla, hiérvala a borbotones durante 1 minuto (3 minutos a más de 6,500 pies) antes de tomarla, cocinar o lavarse los dientes. Si la orden dice que no la tome, hervirla no sirve: use agua embotellada. [[cdc-water-es]]"])}
+  <h3>Humo de incendios forestales</h3>
+  ${esLi(["Consulte la calidad del aire en AirNow en español y siga los consejos de la EPA para protegerse del humo. [[airnow-es]] [[epa-humo-es]]"])}
+</div>
+<aside class="hz-aside">
+  <div class="card">
+    <h2 style="font-size:1.25rem">Recursos oficiales en español</h2>
+    ${esRes([
+      ["Ready.gov (FEMA)", ["ready-es", "ready-es-plan", "ready-es-plan-form", "ready-es-kit", "ready-es-alertas", "ready-es-calor", "ready-es-terremotos", "ready-es-forestales", "ready-es-apagones", "ready-es-hogar"]],
+      ["Utah", ["ugs-roots-es", "eq-es", "br-es-principios", "br-es-kit", "br-es-comunicacion", "br-es-higiene", "br-es-agua"]],
+      ["Salud y aire", ["cdc-heat-es", "cdc-water-es", "epa-humo-es", "airnow-es"]],
+      ["Cruz Roja", ["redcross-es-fuego", "redcross-es-alarma"]],
+      ["Noticias de Utah en español", ["kuer-es", "kpcw-es"]]
+    ])}
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h2 style="font-size:1.25rem">Ayuda</h2>
+    ${esLi(["Emergencias: llame al 911.", "211 Utah conecta con servicios locales y atiende en español: marque 2-1-1. [[utah211-dir]]", "Línea de ayuda para desastres, gratis y las 24 horas: llame o envíe un texto al 1-800-985-5990 y oprima 2 para español. [[samhsa-ddh]]"])}
+  </div>
+</aside>
+</div></section>`
 });
 
 // ---------------- alerts by county

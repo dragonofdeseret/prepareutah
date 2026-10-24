@@ -93,6 +93,15 @@
     else if (has(f, "south") || has(f, "desert")) out.heat = { band: 2, reasons: ["Southern Utah's parks had record-hot summers in 2026. [[kuer-heat-2026]]"] };
     else if (has(f, "valley") || has(f, "wasatch")) out.heat = { band: 2, reasons: ["Salt Lake City hit 109&deg;F in July 2026, and Logan and Ogden reached 106&deg;F. [[dn-slc-109]]"] };
     else out.heat = { band: 1, reasons: ["Heat waves can reach every county, and 2026 set records across Utah. [[kuer-heat-2026]]"] };
+    // Severe weather: canyon east winds hit Davis, Weber, and Box Elder hardest; storms, lightning, and dust reach everywhere.
+    if (["Davis", "Weber", "Box Elder"].indexOf(p.county) !== -1) out.storm = { band: 3, reasons: ["East winds pour out of the canyons onto your county; a 1999 storm gusted to 113 mph at Brigham City. [[nws-ta9909]]"] };
+    else out.storm = { band: 2, reasons: [has(f, "wasatch") ? "The September 2020 windstorm left about 200,000 Wasatch Front customers without power at its peak. [[rmp-2020-storm]]" : "Monsoon thunderstorms, lightning, and dust storms reach every part of Utah. [[zion-monsoon]] [[ksl-dust-2021]]"] };
+    // Water outages: boil orders happen statewide; the Wasatch Front depends on aging aqueducts and faces the biggest quake.
+    if (["Salt Lake", "Davis", "Weber", "Utah"].indexOf(p.county) !== -1) out.water = { band: 3, reasons: ["More than two million Wasatch Front residents rely on aging aqueducts, and a major quake could cut water to hundreds of thousands of households for months. [[ussc-2022]] [[dn-overdue]]"] };
+    else out.water = { band: 2, reasons: ["Boil orders happen somewhere in Utah every year, from broken lines to burn-scar runoff. [[kjzz-riverton]] [[pmn-junction]]"] };
+    // Chemical spills: highest along the I-15 refinery and rail corridor.
+    if (["Salt Lake", "Davis", "Weber"].indexOf(p.county) !== -1) out.hazmat = { band: 2, reasons: ["Refineries, rail yards, I-15, and pipelines run through your county. [[slco-hazmat]] [[utah-gas-report]]"] };
+    else out.hazmat = { band: 1, reasons: ["Hazardous materials travel on highways and rail lines across Utah. [[up-utah]]"] };
     // Home fire: the same everywhere; the household decides how serious it is.
     out.fire = { band: 2, reasons: ["Home fires are the disaster the Red Cross responds to most often. [[redcross-disasters]]", "Utah's fire death rate is below the national rate, but 26 Utahns died in fires in 2023. [[usfa-states]]"] };
 
@@ -148,12 +157,13 @@
     if (med.pregnancy || med.lungHeart || (+p.infants > 0) || (+p.seniors > 0)) bump("heat", 1, "Someone at home is at higher risk from heat: an older adult, a baby, a pregnancy, or a chronic condition. [[cdc-heat-risk]]");
     if (work.outdoor) bump("heat", 1, "You work outdoors, where heat illness is a known risk. [[cdc-heat-risk]]");
     if (work.outdoor) bump("air", 1, "You work outdoors, where wildfire smoke and bad-air days hit hardest. [[niosh-smoke]]");
-    if ((work.hourly || p.selfEmployed) && p.budget !== "tight") bump("economic", 1, "Your income could stop during a disaster or outbreak, so a cash buffer matters more. [[cfpb-guide]]");
+    if ((work.hourly || p.selfEmployed) && p.budget !== "tight") bump("economic", 1, "Your income could stop during a disaster or outbreak, so a cash buffer matters more. [[cfpb-fund]]");
     if (+p.seniors > 0) bump("fire", 1, "People 65 and older are 2.5 times as likely to die in a home fire. [[usfa-older]]");
     else if (med.mobility) bump("fire", 1, "Someone at home needs extra time or help to get out, and a fire may leave only a minute or two. [[nfpa-escape]]");
     if (med.powered) R.heat.reasons.push("Heat can cause power outages, so your powered medical equipment needs a hot-weather plan too. [[cdc-heat-about]]");
     if (med.powered) bump("power", 1, "You rely on powered medical equipment, so outages are a health issue, not just an inconvenience. [[ready-power]]");
     if (p.homeType === "mobile") bump("power", 1, "Manufactured homes can lose heat quickly in winter outages (general guidance).");
+    if (p.homeType === "mobile") bump("storm", 1, "Mobile and manufactured homes aren't safe in high winds or tornadoes; plan where you'd go. [[nws-wind-during]]");
     if (p.brick === "yes" || p.brick === "unsure") {
       R.earthquake.band = Math.max(R.earthquake.band, 2);
       R.earthquake.reasons.push(p.brick === "yes" ? "You live in older brick (pre-1975), which may be unreinforced masonry, the building type most likely to collapse in an earthquake. [[eq-urm]]" : "You're not sure whether your building is older brick; it's worth checking the URM signs. [[eq-urm]]");
@@ -254,18 +264,21 @@
     { id: "fever", tier: 1, cat: "Health & medicine", hz: ["pandemic"], cost: 1, pri: 6, kind: "buy", name: "Thermometer and fever reducers", detail: "From the HiveWatch Utah tier list. [[ready-pandemic]]" },
     { id: "glasses", tier: 1, cat: "Health & medicine", hz: ALL, cost: 1, pri: 4, kind: "buy", name: "Spare glasses, contact supplies, hearing-aid batteries (as needed)", detail: "[[ready-kit]]" },
     { id: "sanit-7", tier: 1, cat: "Sanitation & hygiene", hz: ALL, cost: 1, pri: 6, kind: "buy", name: "A week of toilet paper, menstrual products, wipes, soap, and heavy trash bags", detail: "[[ready-kit]]" },
-    { id: "emergency-toilet", tier: 1, cat: "Sanitation & hygiene", hz: ["earthquake", "flood"], cost: 1, pri: 6, kind: "buy", name: "An emergency toilet: a bucket with a lid, heavy bags, and kitty litter or similar", detail: "Sewer lines can break in earthquakes. Garbage bags and plastic ties are on the Ready.gov kit list. [[ready-kit]]" },
+    { id: "emergency-toilet", tier: 1, cat: "Sanitation & hygiene", hz: ["earthquake", "flood", "water"], cost: 1, pri: 6, kind: "buy", name: "An emergency toilet: a bucket with a lid, heavy bags, and kitty litter or similar", detail: "Sewer lines can break in earthquakes. Garbage bags and plastic ties are on the Ready.gov kit list. [[ready-kit]]" },
     { id: "docs", tier: 1, cat: "Documents & money", hz: ALL, cost: 1, pri: 7, kind: "do", name: "Copies of IDs, insurance cards, and key documents in a waterproof folder (and an encrypted cloud copy)", detail: "[[ready-fin]]" },
     { id: "cash-small", tier: 1, cat: "Documents & money", hz: ["economic", "power", "earthquake"], cost: 1, pri: 6, kind: "buy", name: "Some cash in small bills", detail: "Card readers and ATMs may not work in an outage. [[br-power]]" },
     { id: "blankets", tier: 1, cat: "Warmth & shelter", hz: ["power", "earthquake"], cost: 1, pri: 6, kind: "buy",
       name: function (p) { return (UR.household(p).people === 1 ? "Warm layers and a blanket or sleeping bag" : "Warm layers and a blanket or sleeping bag for each of " + UR.household(p).people + " people"); }, detail: "[[br-power]] [[ready-winter]]" },
-    { id: "car-kit", tier: 1, cat: "Warmth & shelter", hz: ["power", "wildfire", "avalanche"], cost: 1, pri: 5, kind: "buy", when: function (p) { return p.car !== "no"; }, name: "Winter car emergency kit; keep the fuel tank at least half full", detail: "[[ready-winter]] [[br-fire]]" },
+    { id: "car-kit", tier: 1, cat: "Warmth & shelter", hz: ["power", "storm", "wildfire", "avalanche"], cost: 1, pri: 5, kind: "buy", when: function (p) { return p.car !== "no"; }, name: "Winter car emergency kit; keep the fuel tank at least half full", detail: "[[ready-winter]] [[br-fire]]" },
     { id: "radon-test", tier: 1, cat: "Home protection", hz: ["radon"], cost: 1, pri: 7, kind: "buy", name: function (p) { return p.tenure === "rent" ? "Ask whether your unit has been radon-tested, or test it yourself with a low-cost kit" : "Test your home for radon with a low-cost kit"; }, detail: "Mitigate at 4 pCi/L or higher. [[deq-radon]]" },
     { id: "drill", tier: 1, cat: "Kids & family", hz: ["earthquake"], cost: 0, pri: 7, kind: "do", name: "Practice Drop, Cover, and Hold On with everyone at home", detail: "Join the Great Utah ShakeOut, or register a household drill for any day. [[shakeout-ut]] [[ready-quake]]" },
     { id: "hazard-map", tier: 1, cat: "Home protection", hz: ["earthquake", "landslide", "flood"], cost: 0, pri: 6, kind: "do", name: "Look up your address on the hazard maps", detail: "FaultLine Utah's Know Your Ground for earthquake hazards, the UGS Geologic Hazards Portal for landslides, and the flood maps. [[fl-ground]] [[ugs-portal]] [[br-flood]]" },
     { id: "evac-routes", tier: 1, cat: "Safety & tools", hz: ["wildfire", "flood", "landslide"], cost: 0, pri: 7, kind: "do",
       name: function (p) { return p.car === "no" ? "Plan how you'll evacuate without a car: who will drive you, and when to leave early" : "Plan two evacuation routes in different directions and where you'd go"; }, detail: "[[br-fire]] [[ready-fire]]" },
     { id: "air-bookmark", tier: 1, cat: "Air quality", hz: ["air", "wildfire", "gsl"], cost: 0, pri: 5, kind: "do", name: "Bookmark air.utah.gov and the AirNow Fire and Smoke Map", detail: "[[air-utah]] [[airnow-map]]" },
+    { id: "wind-secure", tier: 1, cat: "Home protection", hz: ["storm"], cost: 0, pri: 5, kind: "do", name: "List what to tie down or bring inside when high winds are forecast (trampolines, furniture, decorations)", detail: "Wind can throw even anchored trampolines. [[nws-wind-before]]" },
+    { id: "storm-shelter", tier: 1, cat: "Safety & tools", hz: ["storm"], cost: 0, pri: 5, kind: "do",
+      name: function (p) { return p.homeType === "mobile" ? "Pick a sturdy building nearby to go to in high winds or a tornado warning" : "Pick your storm shelter spot: an interior room on the lowest floor, away from windows"; }, detail: "[[nws-tornado-ww]] [[nws-wind-during]]" },
     { id: "cool-place", tier: 1, cat: "Cooling", hz: ["heat"], cost: 0, pri: 8, kind: "do",
       name: function (p) { return p.county === "Salt Lake" ? "Find your nearest Cool Zone, plus a backup place with air conditioning" : "Pick a cool place to go on dangerous heat days: a library, a cooling center, or a friend with AC"; },
       detail: "Anywhere in Utah, dial 2-1-1 or text your ZIP code to 801-845-2211 for cooling help. [[utah-211]] [[slco-coolzones]]" },
@@ -274,6 +287,8 @@
     { id: "heat-meds", tier: 1, cat: "Health & medicine", hz: ["heat"], cost: 0, pri: 6, kind: "do", when: rx, name: "Ask your pharmacist whether any of your medicines raise your heat risk", detail: "Some blood pressure, depression, and ADHD medicines do. [[cdc-heat-meds]]" },
     { id: "hot-car", tier: 1, cat: "Kids & family", hz: ["heat"], cost: 0, pri: 8, kind: "do", when: function (p) { return p.car !== "no" && ((+p.children || 0) + (+p.infants || 0) > 0 || UR.household(p).pets > 0); },
       name: "Look before you lock: make a habit of checking the back seat every time you leave the car", detail: "A child's body heats up 3 to 5 times faster than an adult's. Never leave a child or pet in a parked car. [[nhtsa-heatstroke]]" },
+    { id: "water-system", tier: 1, cat: "Water", hz: ["water"], cost: 0, pri: 4, kind: "do", name: "Look up which water system serves you and where it posts boil orders", detail: "[[deq-search]] [[pmn-index]]" },
+    { id: "poison-number", tier: 1, cat: "Health & medicine", hz: ALL, cost: 0, pri: 5, kind: "do", name: "Save Utah Poison Control (1-800-222-1222) in every phone", detail: "Free, private, and open 24 hours. [[utah-poison]]" },
     { id: "water-sources", tier: 1, cat: "Water", hz: ["gsl"], cost: 0, pri: 4, kind: "do", name: "Follow your city's watering schedule and the Weekly Lawn Watering Guide", detail: "[[slowtheflow]]" },
 
     // ---------------- Tier 2: 14 days
@@ -290,7 +305,7 @@
       name: function (p) { return p.budget === "tight" ? "A clean-air room: DIY box-fan filter with a MERV 13 filter" : "A clean-air room: portable HEPA air cleaner sized for the room"; },
       detail: function (p) { return (p.budget === "tight" ? "EPA explains how to build a DIY air cleaner from a box fan and a MERV 13 filter. [[epa-diy]]" : "Choose a model sized for the room's square footage and run it on high during smoke. [[epa-cleanroom]] [[epa-filtration]]") + (p.med && p.med.lungHeart ? " Higher priority for your household because of lung or heart conditions." : ""); } },
     { id: "merv13", tier: 2, cat: "Air quality", hz: ["wildfire", "air"], cost: 1, pri: 4, kind: "buy", when: function (p) { return p.homeType !== "apartment" || p.tenure === "own"; }, name: "MERV 13 (or higher) furnace filters, if your system can take them", detail: "[[epa-filtration]]" },
-    { id: "water-heater", tier: 2, cat: "Home protection", hz: ["earthquake"], cost: 1, pri: 8, kind: "do",
+    { id: "water-heater", tier: 2, cat: "Home protection", hz: ["earthquake", "water"], cost: 1, pri: 8, kind: "do",
       name: function (p) { return p.tenure === "rent" ? "Ask your landlord to strap the water heater" : "Strap your water heater to the wall studs"; }, detail: "It protects you and the 30-plus gallons of water inside. [[br-water]]" },
     { id: "secure-furniture", tier: 2, cat: "Home protection", hz: ["earthquake"], cost: 1, pri: 8, kind: "do",
       name: function (p) { return "Secure tall furniture, TVs, and heavy wall hangings" + (p.tenure === "rent" ? " (ask about renter-friendly anchors)" : ""); }, detail: "Move heavy things off high shelves, especially above beds. [[ready-quake]] [[eq-roots]]" },
@@ -304,12 +319,15 @@
     { id: "cooler", tier: 2, cat: "Health & medicine", hz: ["power", "earthquake"], cost: 1, pri: 6, kind: "buy", when: function (p) { return p.med && p.med.refrigerated; }, name: "A cooler and ice plan for refrigerated medicine, plus a fridge thermometer", detail: "Ask your pharmacist how long each medicine is safe at room temperature. [[ready-power]]" },
     { id: "slope-drain", tier: 2, cat: "Home protection", hz: ["landslide"], cost: 1, pri: 4, kind: "do", when: function (p) { return p.tenure === "own" && (p.setting === "foothill" || p.setting === "canyon"); }, name: "Direct downspouts and driveway runoff away from slopes", detail: "[[br-land]]" },
     { id: "aerator", tier: 2, cat: "Water", hz: ["gsl"], cost: 1, pri: 3, kind: "buy", name: "Low-flow faucet aerators and a WaterSense showerhead", detail: "[[br-drought]] [[slowtheflow]]" },
+    { id: "seal-kit", tier: 2, cat: "Safety & tools", hz: ["hazmat"], cost: 1, pri: 4, kind: "buy", name: "Plastic sheeting, duct tape, and scissors to seal a room if you're told to shelter in place", detail: "[[ready-chemical]]" },
     { id: "room-thermo", tier: 2, cat: "Cooling", hz: ["heat"], cost: 1, pri: 4, kind: "buy", when: function (p) { return p.cooling !== "central"; }, name: "A room thermometer for where you sleep", detail: "Fans stop helping once it's 90&deg;F or hotter indoors; that's your cue to go somewhere cooler. [[cdc-heat-about]]" },
+    { id: "fridge-thermo", tier: 2, cat: "Food", hz: ["power", "earthquake", "storm"], cost: 1, pri: 4, kind: "buy", name: "Refrigerator and freezer thermometers", detail: "Keep the fridge at 40&deg;F or below and the freezer at 0&deg;F or below, so you know what's safe after an outage. [[fsis-emergency]] [[foodsafety-outage]]" },
     { id: "pipes", tier: 2, cat: "Warmth & shelter", hz: ["power"], cost: 1, pri: 4, kind: "do", name: "Insulate exposed pipes; know how to let faucets drip in a freeze", detail: "[[br-power]]" },
 
     // ---------------- Tier 3: 30 days
     waterItem(3, 30),
     foodItem(3, 30),
+    { id: "food-rotate", tier: 3, cat: "Food", hz: ALL, cost: 0, pri: 4, kind: "do", name: "Date your stored food and set up first-in, first-out rotation", detail: "New items go behind old ones; write the month and year on each lid. Store food at 40&deg;F to 70&deg;F, out of sunlight. [[usu-restock]] [[usu-conditions]]" },
     { id: "rx-30", tier: 3, cat: "Health & medicine", hz: ALL, cost: 1, pri: 7, kind: "do", when: rx, name: "Ask your prescriber and insurer about 90-day fills or mail order", detail: "[[utah-rx-refill]]" },
     { id: "n95-30", tier: 3, cat: "Air quality", hz: LUNG, cost: 2, pri: 3, kind: "buy", name: function (p) { return (UR.household(p).people * 30) + " N95 respirators in total (about 30 per person, estimate)"; }, detail: "[[niosh-cel]]" },
     { id: "sanit-30", tier: 3, cat: "Sanitation & hygiene", hz: ALL, cost: 2, pri: 3, kind: "buy", name: "A month of hygiene supplies, laundry detergent, and dish soap", detail: "(HiveWatch Utah tier list)" },
@@ -326,6 +344,10 @@
       name: function (p) { return "Keep at least " + UR.water(p, 30).total + " gallons (30 days) stored and rotated"; },
       detail: "During a long event, stored water plus the ability to treat more is the practical goal. [[br-water]] [[church-storage]]" },
     foodItem(4, 90),
+    { id: "staples", tier: 4, cat: "Food", hz: ALL, cost: 2, pri: 3, kind: "buy",
+      name: "Start long-term staples, a little at a time (wheat, white rice, beans, oats, powdered milk, oil)",
+      detail: function (p) { var h = UR.household(p); return "A 2019 BYU guide suggests, per adult per year, about 132 lb of wheat, 65 lb of white rice, 62 lb of beans, 49 lb of nonfat dry milk, and 2 gallons of oil" + (h.grownups > 1 ? " (so about " + (132 * h.grownups) + " lb of wheat for your " + h.grownups + " adults)" : "") + ". Grains can be swapped for one another; see the <a href=\"guides/food.html\">Food storage guide</a>. [[byu-longterm]]" + (p.space === "small" ? " Short on space? Store what fits and lean on what you already eat." : ""); } },
+    { id: "grain-mill", tier: 4, cat: "Food", hz: ALL, cost: 2, pri: 2, kind: "buy", name: "A grain mill if you store wheat, and practice using it", detail: "Flour keeps less than a year, so grind as you go. [[usu-wheat-eat]] [[usu-booklet]]" },
     { id: "rx-90", tier: 4, cat: "Health & medicine", hz: ALL, cost: 2, pri: 5, kind: "do", when: rx, name: "A standing 30 to 90-day medication buffer where legally and medically allowed", detail: function (p) { return "Utah pharmacists may give a one-time emergency refill of a non-controlled drug in some cases; controlled substances are excluded. [[utah-rx-refill]]" + (p.med && p.med.controlled ? " Make a written plan with your prescriber for controlled medications." : ""); } },
     { id: "n95-90", tier: 4, cat: "Air quality", hz: LUNG, cost: 2, pri: 2, kind: "buy", name: function (p) { var n = UR.household(p).grownups; return (n * 50) + " to " + (n * 100) + " N95s for adults, or a reusable elastomeric respirator with filters (estimate)"; }, detail: "[[niosh-cel]]" },
     { id: "fund-3mo", tier: 4, cat: "Documents & money", hz: ["economic"], cost: 3, pri: 4, kind: "do", name: function (p) { return p.selfEmployed ? "Work toward 6 to 12 months of expenses saved (self-employed, estimate)" : "Work toward 3 to 6 months of essential expenses saved"; }, detail: "[[cfpb-fund]] [[church-storage]]" },
@@ -401,6 +423,54 @@
     done = done || {}; skip = skip || [];
     return checklist[1].concat(checklist[2]).filter(function (i) { return i.cost === 0 && !done[i.id] && skip.indexOf(i.id) === -1; })
       .sort(function (a, b) { return b.pri - a.pri; }).slice(0, 6);
+  };
+
+  // ---------------------------------------------------------------- calendar reminders
+  // Recurring upkeep, downloaded as an .ics file made in the browser. month/day: a yearly date;
+  // every: months between repeats (first one next month, plus `offset` months).
+  UR.reminders = function (p) {
+    var sel = p.hazards && p.hazards.length ? p.hazards : UR.hazards.map(function (x) { return x.id; });
+    var on = function (id) { return sel.indexOf(id) !== -1; };
+    var r = [
+      { id: "smoke", title: "Test smoke alarms", when: "Every month", every: 1, why: "Test smoke alarms every month and replace them every 10 years. [[usfa-alarms]]" },
+      { id: "water", title: "Replace stored tap water and check your go-bags", when: "Every 6 months", every: 6, why: "Water that isn't commercially bottled should be replaced every six months. [[ready-water]]" },
+      { id: "escape", title: "Practice your fire escape plan", when: "Twice a year", every: 6, offset: 3, why: "Practice your home escape plan twice a year. [[nfpa-escape]]" }
+    ];
+    if (p.med && p.med.rx) r.push({ id: "meds", title: "Check medication supply, refills, and expiration dates", when: "Every 3 months", every: 3, why: "Refill on time, and keep your medication list current. [[utah-rx-refill]]" });
+    if (on("earthquake")) r.push({ id: "shakeout", title: "Earthquake drill: Drop, Cover, and Hold On", when: "Every April, around the Great Utah ShakeOut", month: 4, day: 16, why: "You can register a household drill for any day. [[shakeout-ut]]" });
+    if (on("heat")) r.push({ id: "heat", title: "Get ready for heat season", when: "Every May", month: 5, day: 15, why: "Pick your cool place, check the room thermometer, and set up hot-day check-ins. [[cdc-heat-about]]" });
+    if (on("wildfire")) r.push({ id: "fire-season", title: "Before fire season: go-bags, two ways out, and the 5-foot zone around your home", when: "Every June", month: 6, day: 1, why: "[[nfpa-hiz]] [[ready-fire]]" });
+    if (on("power")) r.push({ id: "winter", title: "Get ready for winter: car kit, carbon monoxide alarm, warm layers, pipes", when: "Every October", month: 10, day: 15, why: "[[ready-winter]]" });
+    r.push({ id: "insurance", title: "Review insurance and update your home inventory", when: "Every January", month: 1, day: 15, why: "Standard policies usually exclude flood and earthquake; check what yours covers. [[ready-quake]] [[br-flood]]" });
+    return r;
+  };
+
+  // A standard iCalendar file of all-day, repeating events with a morning reminder.
+  UR.icsFile = function (list, today) {
+    today = today || new Date();
+    function d8(d) { return d.getFullYear() + ("0" + (d.getMonth() + 1)).slice(-2) + ("0" + d.getDate()).slice(-2); }
+    function text(s) { return String(s).replace(/<[^>]+>|\[\[[^\]]+\]\]/g, "").replace(/&[a-z#0-9]+;/gi, " ").replace(/\s+/g, " ").trim().replace(/([\;,])/g, "\\$1"); }
+    function fold(line) { var out = []; while (line.length > 74) { out.push(line.slice(0, 74)); line = " " + line.slice(74); } out.push(line); return out.join("\r\n"); }
+    var stamp = today.toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
+    var lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Prepare Utah//Household reminders//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "X-WR-CALNAME:Prepare Utah reminders"];
+    list.forEach(function (r) {
+      var start, rule;
+      if (r.month) {
+        start = new Date(today.getFullYear(), r.month - 1, r.day);
+        if (start <= today) start = new Date(today.getFullYear() + 1, r.month - 1, r.day);
+        rule = "FREQ=YEARLY";
+      } else {
+        start = new Date(today.getFullYear(), today.getMonth() + 1 + (r.offset || 0), 1);
+        rule = "FREQ=MONTHLY" + (r.every > 1 ? ";INTERVAL=" + r.every : "");
+      }
+      var end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1);
+      lines.push("BEGIN:VEVENT", "UID:" + r.id + "-" + stamp + "@prepareutah.com", "DTSTAMP:" + stamp,
+        "DTSTART;VALUE=DATE:" + d8(start), "DTEND;VALUE=DATE:" + d8(end), "RRULE:" + rule,
+        fold("SUMMARY:" + text(r.title)), fold("DESCRIPTION:" + text(r.why) + (text(r.why) ? " " : "") + "Your plan: https://prepareutah.com/plan.html"),
+        "BEGIN:VALARM", "ACTION:DISPLAY", fold("DESCRIPTION:" + text(r.title)), "TRIGGER;RELATED=START:PT9H", "END:VALARM", "END:VEVENT");
+    });
+    lines.push("END:VCALENDAR");
+    return lines.join("\r\n") + "\r\n";
   };
 
   // ---------------------------------------------------------------- first hour
@@ -569,7 +639,7 @@
         "Ask your child's school how it reunites children with parents. [[ready-responder]]"
       ],
       money: [
-        "Base your savings goal on what past surprises cost you, and save tax refunds or windfalls when income is uneven. [[cfpb-guide]]",
+        "Base your savings goal on what past surprises cost you, and save tax refunds or windfalls when income is uneven. [[cfpb-fund]]",
         "Keep some cash in small bills; ATMs and card readers may not work. [[ready-fin]]"
       ],
       self: ["In Utah, self-employment income may not qualify for regular unemployment benefits. After a declared major disaster, self-employed people may get Disaster Unemployment Assistance for up to 26 weeks. [[dws-ui-guide]] [[dol-dua]]"],

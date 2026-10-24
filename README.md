@@ -3,9 +3,11 @@
 **Utah household readiness.** A free, private, plain-language preparedness site for Utah households, at prepareutah.com. Sister site to [FaultLine Utah](https://faultlineutah.com/) (earthquake hazards by address).
 
 - **Make my plan** (`start.html`): a short questionnaire (county, setting, home and cooling, household, health, diets and allergens, work and getting around, resources).
-- **My plan** (`plan.html`): the personal plan it builds. A free "first hour" starter list, priority bands for 12 Utah hazards plus money, the household's county alert sign-up, checklists for 7, 14, 30 and 90 days sized to the household, a budget-aware "buy first" list, cards for diets and work, before/during/after actions, and a print/PDF view.
+- **My plan** (`plan.html`): the personal plan it builds. A free "first hour" starter list, priority bands for 15 Utah hazards plus money, the household's county alert sign-up, checklists for 7, 14, 30 and 90 days sized to the household, a budget-aware "buy first" list, downloadable calendar reminders (.ics, made in the browser), cards for diets and work, before/during/after actions, and a print/PDF view.
 - **Hazards** (`hazards/`): one stand-alone guide per hazard, with live official links.
 - **Alerts** (`alerts.html`): how to get emergency alerts in every Utah county, plus phone settings, weather radio, and what "Ready, Set, Go" means.
+- **Guides** (`guides/`): family communication plan (fill in, save in the browser, print folding wallet cards), food storage, insurance, stay or go, after a disaster, and a neighborhood plan worksheet. The Guides page also links Be Ready Utah's business, school, community and CERT sections.
+- **En español** (`es/`): a Spanish essentials page (alerts, first-hour steps, key risks, official Spanish resources). It was translated here and needs review by a native speaker before it's promoted.
 - **Sources** (`sources.html`) and **About** (`about.html`): every source, privacy, the disclaimer, and the sister-site note.
 
 It's a plain static site: HTML, CSS, and JavaScript, with nothing to install. Answers and checkmarks stay in the visitor's browser (`localStorage` keys `ur.profile`, `ur.checks`, `ur.tab`; "ur" is left over from the working name and isn't visible to anyone). No accounts, cookies, analytics, or outside fonts. The only outside request is the optional "Recent Utah earthquakes" list, which loads public USGS data and falls back to a link if USGS is down.
@@ -20,6 +22,8 @@ site/                     ← the website; this folder is what gets published
   assets/js/hazards.js    ← hazard guide text
   assets/js/planner.js    ← county bands, checklist items, quantities, household cards, diets, work, first hour
   assets/js/alerts.js     ← county alert sign-ups and statewide alert steps
+  assets/js/guides.js     ← guide text (family plan, food, insurance, stay or go, recovery, neighbors)
+  assets/js/tools.js      the family plan and neighborhood forms (saved in the browser, wallet cards)
   assets/js/*.js          app code (questionnaire, dashboard, USGS list, citations)
   sitemap.xml             generated with the pages
   robots.txt, _headers
@@ -28,7 +32,9 @@ scripts/
   serve.py                local preview server
   test_site.py            headless browser tests (Playwright)
   screenshots.py          test screenshots and a sample printed plan
-  checklinks.sh           link checker
+  linkcheck.js            checks every source and county alert link (runs monthly on GitHub)
+  checklinks.sh           older ad-hoc link checker
+notes/                    private drafts, not published or committed (see .gitignore)
 ```
 
 ## Preview it on this Mac
@@ -47,6 +53,8 @@ Then open http://localhost:8738. Press Ctrl+C in the terminal to stop it. (Fault
 | Checklist items, county bands, household cards | `site/assets/js/planner.js` |
 | Sources and links | `site/assets/js/sources.js` |
 | County alert sign-ups | `site/assets/js/alerts.js` |
+| Guides | `site/assets/js/guides.js` (forms for the family plan and neighborhood worksheet are `TOOLS` in `scripts/build.js`) |
+| Spanish page | the "Spanish essentials" section of `scripts/build.js`, and `T.es` for its header and footer |
 | Diet list and the words the free-text box recognizes | `UR.DIETS` and `UR.ALLERGENS` in `planner.js` |
 | Work options | `UR.WORK` in `planner.js` (tips are in `UR.additions`) |
 | Home, About, Sources page text, header, footer | `scripts/build.js` |
@@ -80,6 +88,14 @@ FaultLine Utah is linked from the footer of every page, the home page (sister-si
 - **First hour:** five free steps everyone gets (alerts, meeting places, smoke-alarm test, shutoffs, a water start) plus personal ones while the total stays within 60 minutes. Steps that match a checklist item share its id, so checking either checks both.
 - **Diet text box:** `UR.detectDiets` matches what people type against each diet's `words` and checks the boxes it recognizes, only in the browser. Allergen words must be whole words and count only when the text mentions an allergy or names no other diet ("eggplant" isn't an egg allergy). Anything unrecognized is shown in the plan as the person's own note.
 - **Buy first:** the most protective purchases from the 7- and 14-day tiers. Items over the household's budget move down the list. Critical medical items (prescriptions, backup power for medical equipment, formula) always stay near the top.
+
+## Keeping links fresh
+
+`.github/workflows/linkcheck.yml` runs `node scripts/linkcheck.js` on the 1st of every month (or on demand from the repo's Actions tab). If any source or county alert link is broken, it opens an issue labeled "links" (or updates the open one) with a table of what broke and where it's used. Sites that block scripts (CDC, FEMA, FTC and a few others) are listed separately as "check by hand." Run it locally the same way:
+
+```bash
+node scripts/linkcheck.js
+```
 
 ## Checks
 
@@ -129,6 +145,10 @@ The repo's Settings → Pages already has Source set to **GitHub Actions** and `
 - [ ] Resolve the items marked [unverified]/[verify] (see Sources and the hazard pages).
 - [ ] Re-check fast-changing figures (measles counts, H5N1, drought and fire data) and their "as of" dates.
 - [ ] A share image (`og:image`) for links posted on social media.
+
+**Outreach**
+- [ ] Send the note in `notes/dem-report.md` to Utah DEM (https://dem.utah.gov/contact/) about Be Ready Utah's lapsed domains, placeholder pages, and broken links. Re-check the links that day.
+- [ ] Have a native Spanish speaker review `es/index.html` before linking it widely.
 
 **Alerts to confirm** (checked Oct 22, 2026; agencies change vendors, so re-check `alerts.js` every few months)
 - [ ] Wayne County: its sign-up link opens the Sevier County Sheriff's Office system. Confirm with Wayne County Emergency Management (435-836-1348).

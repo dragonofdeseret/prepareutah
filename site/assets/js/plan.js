@@ -1,7 +1,7 @@
 /* Dashboard: renders the personalized plan from localStorage. */
 (function () {
   var UR = window.UR, ic = UR.icon, cite = UR.cite, esc = UR.esc;
-  var TAG = { earthquake: "Earthquake", pandemic: "Outbreaks", gsl: "Drought & lake", wildfire: "Wildfire", air: "Air quality", flood: "Flood", landslide: "Landslide", radon: "Radon", power: "Power", avalanche: "Avalanche", economic: "Money", heat: "Heat", fire: "Home fire" };
+  var TAG = { earthquake: "Earthquake", pandemic: "Outbreaks", gsl: "Drought & lake", wildfire: "Wildfire", air: "Air quality", flood: "Flood", landslide: "Landslide", radon: "Radon", power: "Power", avalanche: "Avalanche", economic: "Money", heat: "Heat", fire: "Home fire", storm: "Storms & wind", water: "Water outage", hazmat: "Chemical spill" };
   var COST = ["Free", "$", "$$", "$$$"];
   function hz(id) { for (var i = 0; i < UR.hazards.length; i++) if (UR.hazards[i].id === id) return UR.hazards[i]; }
   function money(n) { return "$" + Math.round(n).toLocaleString("en-US"); }
@@ -107,6 +107,13 @@
           }).join("") + '</div>';
       }).join("") + '</div></section>';
 
+    // ---------- reminders (an .ics file made here in the browser)
+    var rem = UR.reminders(p);
+    html += '<section class="dash-section no-print" id="reminders"><div class="wrap"><h2>' + ic("clock") + ' Put the upkeep on your calendar</h2>' +
+      '<div class="card"><p class="small muted" style="margin-top:0">Preparedness fades unless something reminds you. Download these as one calendar file for Apple Calendar, Google Calendar, or Outlook. The file is made in your browser; nothing is sent anywhere.</p>' +
+      '<ul class="reminder-list">' + rem.map(function (r) { return '<li><strong>' + esc(r.title) + '</strong> <span class="muted small">(' + esc(r.when) + ')</span><br><span class="small">' + cite(r.why) + '</span></li>'; }).join("") + '</ul>' +
+      '<button type="button" class="btn" data-ics>' + ic("clock") + ' Download calendar reminders</button></div></div></section>';
+
     // ---------- additions
     var adds = UR.additions(p);
     if (adds.length) html += '<section class="dash-section" id="household"><div class="wrap"><h2>' + ic("home") + ' Just for your household</h2><p class="muted small">Based on your answers about health, home, family, and resources.</p><div class="add-grid">' +
@@ -168,6 +175,13 @@
       t.addEventListener("keydown", function (e) { if (e.key === "ArrowRight") sel_((i + 1) % tabs.length, true); if (e.key === "ArrowLeft") sel_((i + tabs.length - 1) % tabs.length, true); });
     });
     var lastTab = UR.store.get("ur.tab", 0); if (lastTab > 0 && lastTab < 4) sel_(lastTab);
+    rootEl.querySelector("[data-ics]").addEventListener("click", function () {
+      var blob = new Blob([UR.icsFile(rem)], { type: "text/calendar" }), a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = "prepare-utah-reminders.ics";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+      UR.toast("Calendar file downloaded. Open it to add the reminders.");
+    });
     // Re-bind erase/print buttons that were rendered after common.js ran.
     rootEl.querySelectorAll("[data-print]").forEach(function (b) { b.addEventListener("click", function () { window.print(); }); });
     rootEl.querySelectorAll("[data-erase]").forEach(function (b) { b.addEventListener("click", function () { if (!confirm("Erase your answers and checklist progress from this browser? This can't be undone.")) return; UR.store.eraseAll(); UR.toast("Your data has been erased from this browser."); setTimeout(function () { location.reload(); }, 900); }); });

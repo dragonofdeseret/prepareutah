@@ -14,3 +14,6 @@ __pycache__/
 
 # Test screenshots (scripts/screenshots.py)
 screenshots/
+
+# Private notes and drafts (not published)
+notes/

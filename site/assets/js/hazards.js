@@ -505,6 +505,145 @@
   });
 
   H.push({
+    id: "storm", name: "Severe weather & windstorms", short: "Canyon winds, lightning, tornadoes, hail, dust storms", icon: "storm", color: "#2E5E6E",
+    tagline: "Utah's worst windstorms roar down the canyons with little warning. Tying down what can fly and knowing where to shelter keeps most people safe.",
+    summary: "Severe weather in Utah means canyon windstorms along the Wasatch Front, summer lightning in the mountains, sudden dust storms on the interstates, hail, and the occasional tornado. The September 2020 windstorm left about 200,000 Rocky Mountain Power customers without power at its peak. [[rmp-2020-storm]]",
+    why: [
+      "The September 8, 2020 windstorm hit 373,674 Rocky Mountain Power customers, with 203,930 out at the peak; 9,442 were without power for more than four days. Gusts reached 99 mph in Farmington. [[rmp-2020-storm]]",
+      "That storm overturned 45 semi trucks, and Salt Lake City alone lost more than 1,500 public trees. [[npr-2020-wind]] [[slc-retree]]",
+      "East winds pour out of the canyons onto Davis, Weber, and Box Elder counties. A 1999 storm brought a 113 mph gust at Brigham City and blew 20 semis over on I-15. [[nws-ta9909]]",
+      "Utah averages about two tornadoes a year. The August 11, 1999 Salt Lake City tornado killed one person, injured more than 80, and caused more than $170 million in damage. [[nws-slc-tornado]]",
+      "Utah has had 23 lightning deaths in 30 years, a larger share of U.S. deaths than its share of the population; both 2026 deaths were hikers on Wasatch peaks. [[kpcw-lightning]] [[nws-lightning-2026]]",
+      "Dust can blind drivers in seconds: a 2021 dust storm on I-15 near Kanosh caused a 22-vehicle pileup that killed eight people. [[ksl-dust-2021]]"
+    ],
+    who: [
+      "Hikers and climbers on peaks and ridges during summer afternoon thunderstorms. [[nws-lightning-2026]] [[zion-monsoon]]",
+      "People in mobile and manufactured homes, which aren't safe in high winds or tornadoes. [[nws-wind-during]] [[spc-tornado-safety]]",
+      "Drivers on open highways, especially high-profile trucks in wind and anyone caught in blowing dust. [[npr-2020-wind]] [[ksl-dust-2021]]",
+      "Anyone who relies on power for medical equipment, since windstorms can cause long outages. [[rmp-storm]]"
+    ],
+    before: [
+      "A tornado watch means tornadoes are possible. A warning means one has been seen or shown on radar: take shelter now. [[nws-tornado-ww]]",
+      "When high winds are forecast, tie down or bring in outdoor furniture, decorations, and trampolines. Wind can throw even anchored trampolines. [[nws-wind-before]] [[ap-trampoline]]",
+      "Trim branches away from your house, but never prune near power lines; Rocky Mountain Power will send an arborist for free. [[nws-wind-before]] [[rmp-trees]]",
+      "Pick your tornado shelter: an interior room on the lowest floor of a sturdy building, away from windows. [[nws-tornado-ww]]",
+      "A NOAA Weather Radio with an alert setting sounds for warnings, even overnight. [[nws-nwrsame]]",
+      "If you rely on powered medical equipment, plan for a multi-day outage and register with Rocky Mountain Power's medical program. [[rmp-storm]] [[rmp-afn]]",
+      "In summer, hike early: monsoon thunderstorms often build in the afternoon. [[zion-monsoon]] [[bryce-lightning]]"
+    ],
+    during: [
+      "When thunder roars, go indoors, and stay inside 30 minutes after the last thunder. [[nws-lightning-safety]] [[nws-lightning-tips]]",
+      "Safe shelter is a substantial building or a hard-topped vehicle. Get off peaks and ridges, and never shelter under a lone tree or rock overhang. [[nws-lightning-tips]]",
+      "Small huts aren't safe shelter: in 2026, a hiker died while sheltering in the small metal hut on the summit of Mount Timpanogos. [[townlift-timp]]",
+      "High wind: get inside a sturdy building, away from windows. If you're in a mobile home, move to a sturdy building before the wind picks up. [[nws-wind-during]]",
+      "Tornado: go to your shelter room now. In a mobile home, get out and go to a sturdy building. [[nws-tornado-ww]] [[spc-tornado-safety]]",
+      "Dust storm while driving: don't drive into it. Pull all the way off the road, turn off all your lights, set the parking brake, and take your foot off the brake. [[nws-dust]]",
+      "Hail: stay inside and away from windows. In a car, stay inside until it stops. [[nws-hail]]"
+    ],
+    after: [
+      "Assume every downed line is live: stay at least 35 feet away, call 911, then call Rocky Mountain Power. [[rmp-storm]]",
+      "Report outages to Rocky Mountain Power at 1-877-508-5088, by texting OUT to 759677, or on the outage map. [[rmp-outages]]",
+      "Run generators outside, at least 20 feet from your home. [[rmp-storm]] [[cdc-generator]]",
+      "Photograph damage, keep receipts, and hold off on permanent repairs until your insurer inspects. Most homeowners policies cover wind damage and trees that fall on the house, but not removing trees that hit nothing. [[uid-home-claims]]",
+      "Cutting up fallen trees? Fuel the chainsaw at least 10 feet from flames or sparks, watch for kickback, don't cut overhead, and never work alone. [[osha-chainsaw]]"
+    ],
+    live: [
+      { label: "NWS Salt Lake City warnings map", src: "nws-slc-wwa" },
+      { label: "NWS Grand Junction (eastern Utah)", src: "nws-gjt" },
+      { label: "Storm Prediction Center outlooks", src: "spc-outlook" },
+      { label: "Rocky Mountain Power outage map", src: "rmp-outages" },
+      { label: "UDOT Traffic (closures, road weather)", src: "udot-traffic" }
+    ],
+    learn: ["nws-lightning-safety", "nws-wind-before", "nws-tornado-ww", "rmp-storm", "uid-home-claims"]
+  });
+
+  H.push({
+    id: "water", name: "Water & sewer outages", short: "Boil orders, broken mains, life without running water", icon: "tap", color: "#3B7A8C",
+    tagline: "Water mains break, supplies get contaminated, and a big earthquake could cut water and sewer for weeks. Stored water and knowing what a boil order means go a long way.",
+    summary: "Utah has 978 public water systems, and when one becomes dangerously contaminated it issues a boil order. After a major Salt Lake County earthquake, FEMA modeling predicts more than 300,000 households without drinkable water for 90 days. [[deq-dw]] [[dn-overdue]]",
+    why: [
+      "When drinking water becomes dangerously contaminated, the local water system issues a boil order, and it has 24 hours to notify people who could drink the water. [[deq-dw]] [[epa-pn]]",
+      "Boil orders happen somewhere in Utah every year. In 2026, Riverton (irrigation water in the lines), Junction (burn-scar runoff), and Beaver (a broken supply line) all had one. [[kjzz-riverton]] [[pmn-junction]] [[kutv-beaver]]",
+      "FEMA modeling predicts that a magnitude 7.0 Salt Lake County earthquake could leave more than 300,000 households without drinkable water for 90 days. [[dn-overdue]]",
+      "More than two million Wasatch Front residents rely on aging aqueducts; a break could leave hundreds of thousands without water for six months or longer. [[ussc-2022]]",
+      "In a 2024 Envision Utah poll, Utahns said they worried more about losing drinking water, power, and sewer service after an earthquake than about deaths or long-term devastation. [[sltrib-poll-2025]]"
+    ],
+    who: [
+      "Families with babies: during a boil order, ready-to-use formula is the safest choice if you use formula. [[cdc-advisories]]",
+      "Homes on private wells, which need disinfecting and testing after a flood. [[cdc-water]]",
+      "Everyone after a big earthquake, when water, sewer, power, and gas could be out for days to months. [[ugs-scenario]]"
+    ],
+    before: [
+      "Store at least 1 gallon of water per person per day, starting with a 14-day supply. [[dem-water-guide]]",
+      "Strap your water heater: the tank holds clean water you can use in an outage. [[dem-water-guide]] [[fema-food-water]]",
+      "Look up which water system serves your address, and know where it posts notices. [[deq-search]] [[deq-emergencies]]",
+      "Build an emergency toilet: two buckets, heavy-duty bags, and kitty litter. [[br-sanitation]]",
+      "Keep plain unscented bleach, hand sanitizer with at least 60% alcohol, moist towelettes, garbage bags, and ties. [[br-sanitation]] [[ready-kit]]"
+    ],
+    during: [
+      "<strong>Boil water advisory:</strong> bring water to a full rolling boil for 1 minute (3 minutes above 6,500 feet) and let it cool. Use boiled or bottled water for drinking, cooking, brushing teeth, ice, pets, and baby formula. If your water system's notice says to boil longer, follow it. [[cdc-advisories]] [[cdc-boil]] [[deq-boil-faq]]",
+      "<strong>Do-not-drink order:</strong> boiling won't help, because the problem may be chemicals. Use bottled water for drinking and cooking. <strong>Do-not-use orders</strong> are rare: use bottled water for everything. [[cdc-advisories]]",
+      "Dishes: a dishwasher with a sanitizing cycle is generally fine. To hand-wash, soak dishes for 1 minute in 1 teaspoon of unscented bleach per gallon of warm water. [[cdc-advisories]]",
+      "Can't boil? Utah DEQ allows 1/8 teaspoon of plain household bleach per gallon; let it stand 30 minutes. [[deq-boil-faq]] [[ready-water]]",
+      "No running water? Your water heater, pipes, and ice cubes hold clean water. To use the heater, turn off its power or gas first, open the drain at the bottom, and open a hot-water faucet. Never use water from a heating radiator. [[fema-food-water]] [[cdc-clean-water]]",
+      "After an earthquake, don't flush or pour anything down drains until you know the sewer pipes are safe. Use a two-bucket toilet: one for urine, one lined with two bags and kitty litter. [[br-sanitation]]",
+      "Pool and spa water is fine for washing, but not for drinking. [[cdc-clean-water]]"
+    ],
+    after: [
+      "When a boil order lifts, flush your household pipes and throw out ice made during the order. [[deq-boil-faq]]",
+      "Bury waste at least 200 feet from water and living areas, or keep it in a lidded can until it can be collected. Never dump it in streams or canals. [[br-sanitation]]",
+      "Refill and date your stored water. [[ready-water]]"
+    ],
+    live: [
+      { label: "Utah Public Notice website (local boil orders)", src: "pmn-index" },
+      { label: "Utah DEQ: find your water system", src: "deq-search" },
+      { label: "Utah DEQ drinking water emergencies", src: "deq-emergencies" }
+    ],
+    learn: ["cdc-advisories", "deq-boil-faq", "br-sanitation", "dem-water-guide"]
+  });
+
+  H.push({
+    id: "hazmat", name: "Chemical spills & hazmat", short: "Rail, highway, and refinery accidents; sheltering in place", icon: "flask", color: "#8C5A2B",
+    tagline: "Trains, trucks, pipelines, and refineries move hazardous chemicals right through Utah's cities. If something leaks, you'll be told to leave or to shelter in place, and you need to know how.",
+    summary: "Hazardous materials travel through Utah on I-15, I-80, and three major rail lines, and five refineries line I-15 between Rose Park and Bountiful. Accidents are rare, but when one happens, officials decide whether you evacuate or shelter in place. [[slco-hazmat]] [[utah-gas-report]]",
+    why: [
+      "Union Pacific runs 1,265 miles of track in Utah, and hazardous waste is among the top commodities it carries in the state. [[up-utah]]",
+      "Salt Lake County's hazmat plan names I-15, I-215, and I-80, three major rail lines, and several pipelines as hazmat threats. [[slco-hazmat]]",
+      "Utah's five refineries sit along I-15 between Rose Park and Bountiful. [[utah-gas-report]]",
+      "In 2005, a leaking rail tank car in South Salt Lake forced about 3,000 residents to evacuate and closed I-15. In 2009, a refinery explosion in Woods Cross damaged more than 100 homes. [[fhwa-roper]] [[csb-silver-eagle]]",
+      "In 2022, a burning chemical truck on I-80 led residents near Tollgate in Summit County to shelter in place. [[ksl-tollgate]]"
+    ],
+    who: [
+      "People who live or work near rail lines, interstates, refineries, and pipelines. [[slco-hazmat]]",
+      "People who are outdoors or driving when a leak happens. [[ready-chemical]]"
+    ],
+    before: [
+      "Sign up for your county's alerts: in a chemical emergency, that's how evacuation and shelter-in-place orders reach you. [[dem-be-informed]]",
+      "Pick a shelter room: an interior room above ground (not the basement), with few windows. [[br-hazmat]] [[ready-shelter]]",
+      "Keep plastic sheeting, duct tape, and scissors in your kit for sealing a room if you're told to. [[ready-chemical]]",
+      "Never mix bleach with ammonia or any other cleaner. [[cdc-bleach]]",
+      "Save Utah Poison Control in every phone: 1-800-222-1222, free and private, 24 hours a day. [[utah-poison]]"
+    ],
+    during: [
+      "Listen to officials about whether it's safer to evacuate or shelter in place. [[cdc-chem-response]]",
+      "<strong>Evacuate:</strong> go right away. In a car, close the windows and vents and turn off the air conditioning. If you're outside, stay upwind, uphill, and upstream, at least half a mile away. [[ready-chemical]] [[fema-is5]]",
+      "<strong>Shelter in place:</strong> bring everyone and pets inside, lock doors and windows, close vents and fireplace dampers, and turn off fans and heating or cooling. Go to your interior room, and if you're told to, seal it with plastic sheeting and duct tape and fill gaps with wet towels. [[ready-chemical]] [[ready-shelter]]",
+      "If there's a risk of explosion, stay away from windows. [[br-hazmat]]"
+    ],
+    after: [
+      "Stay sheltered until officials say it's safe to leave. [[ready-chemical]]",
+      "If you were exposed, take off your clothing and seal it in a plastic bag, wash with soap and water, flush your eyes, and get medical care or call Poison Control at 1-800-222-1222. [[ready-chemical]] [[cdc-chem-response]]",
+      "Report spills to Utah DEQ's 24-hour line at (801) 536-4123, and call 911 if anyone is in danger. [[deq-report]]"
+    ],
+    liveTitle: "Get help", liveNote: "24-hour lines for exposures and spills.",
+    live: [
+      { label: "Utah Poison Control Center", src: "utah-poison" },
+      { label: "Report a spill to Utah DEQ", src: "deq-report" }
+    ],
+    learn: ["ready-chemical", "cdc-chem-response", "br-hazmat", "ready-shelter"]
+  });
+
+  H.push({
     id: "avalanche", name: "Avalanche & backcountry", short: "Forecasts, gear, training", icon: "snow", color: "#4B7A9B",
     tagline: "Most avalanche accidents involve backcountry travelers. Gear, training, and the daily forecast change the odds.",
     summary: "If anyone in your household skis, snowboards, snowmobiles, snowshoes, or hikes in Utah's mountains in winter, avalanche safety belongs in your plan. For everyone else, it mostly means road closures in the canyons and checking conditions before you drive.",

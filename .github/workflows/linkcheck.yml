@@ -1,5 +1,5 @@
 # Checks every source and county alert link on the 1st of each month (and on demand).
-# If any are broken, it opens an issue labeled "links", or updates the open one.
+# If any are broken, it opens an issue labeled "links", or updates the open one; a clean run closes it.
 name: Link check
 
 on:
@@ -33,3 +33,10 @@ jobs:
           num=$(gh issue list --label links --state open --json number --jq '.[0].number')
           if [ -n "$num" ]; then gh issue edit "$num" --body-file report.md; gh issue comment "$num" --body "Updated by the $(date +%B) link check."
           else gh issue create --title "Broken links" --label links --body-file report.md; fi
+      - name: Close the issue when everything passes
+        if: steps.check.outputs.broken == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          num=$(gh issue list --label links --state open --json number --jq '.[0].number')
+          if [ -n "$num" ]; then gh issue close "$num" --comment "The $(date +%B) link check found no broken links."; fi

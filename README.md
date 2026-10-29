@@ -6,7 +6,7 @@
 - **My plan** (`plan.html`): the personal plan it builds. A free "first hour" starter list, priority bands for 15 Utah hazards plus money, the household's county alert sign-up, checklists for 7, 14, 30 and 90 days sized to the household, a budget-aware "buy first" list, downloadable calendar reminders (.ics, made in the browser), cards for diets and work, before/during/after actions, and a print/PDF view.
 - **Hazards** (`hazards/`): one stand-alone guide per hazard, with live official links.
 - **Alerts** (`alerts.html`): how to get emergency alerts in every Utah county, plus phone settings, weather radio, and what "Ready, Set, Go" means.
-- **Guides** (`guides/`): family communication plan (fill in, save in the browser, print folding wallet cards), food storage, insurance, stay or go, after a disaster, and a neighborhood plan worksheet. The Guides page also links Be Ready Utah's business, school, community and CERT sections.
+- **Guides** (`guides/`): 90 days without utilities (built on the FEMA-funded magnitude 7.0 Salt Lake City segment scenario, where water stays out longest), family communication plan (fill in, save in the browser, print folding wallet cards), food storage, insurance, stay or go, after a disaster, and a neighborhood plan worksheet. The Guides page also links Be Ready Utah's business, school, community and CERT sections.
 - **En español** (`es/`): a Spanish essentials page (alerts, first-hour steps, key risks, official Spanish resources). It was translated here and needs review by a native speaker before it's promoted.
 - **Sources** (`sources.html`) and **About** (`about.html`): every source, privacy, the disclaimer, and the sister-site note.
 
@@ -22,7 +22,7 @@ site/                     ← the website; this folder is what gets published
   assets/js/hazards.js    ← hazard guide text
   assets/js/planner.js    ← county bands, checklist items, quantities, household cards, diets, work, first hour
   assets/js/alerts.js     ← county alert sign-ups and statewide alert steps
-  assets/js/guides.js     ← guide text (family plan, food, insurance, stay or go, recovery, neighbors)
+  assets/js/guides.js     ← guide text (90 days without utilities, family plan, food, insurance, stay or go, recovery, neighbors)
   assets/js/tools.js      the family plan and neighborhood forms (saved in the browser, wallet cards)
   assets/js/*.js          app code (questionnaire, dashboard, USGS list, citations)
   sitemap.xml             generated with the pages
@@ -149,6 +149,7 @@ The repo's Settings → Pages already has Source set to **GitHub Actions** and `
 **Outreach**
 - [ ] Send the note in `notes/dem-report.md` to Utah DEM (https://dem.utah.gov/contact/) about Be Ready Utah's lapsed domains, placeholder pages, and broken links. Re-check the links that day.
 - [ ] Have a native Spanish speaker review `es/index.html` before linking it widely.
+- [ ] The 90-day guide mentions the Pentagon's reported FORTRESS initiative using news coverage (Fox News, and Snopes as of Oct. 26, 2026, saying the 90-day figure wasn't confirmed on the record). Update that sentence once the Pentagon publishes the policy.
 
 **Alerts to confirm** (checked Oct 22, 2026; agencies change vendors, so re-check `alerts.js` every few months)
 - [ ] Wayne County: its sign-up link opens the Sevier County Sheriff's Office system. Confirm with Wayne County Emergency Management (435-836-1348).
@@ -162,6 +163,7 @@ The repo's Settings → Pages already has Source set to **GitHub Actions** and `
 - [ ] Clinician and pharmacist: outbreak, medication and medical-equipment text, the heat-illness steps, and the diabetes, kidney, tube-feeding and allergy tips.
 - [ ] Registered dietitian: the diet tips (the soft-foods and halal tips rest on thin sources).
 - [ ] Utah emergency manager: the county priority bands.
+- [ ] Fire marshal and a licensed plumber: the 90-day guide's heating, fuel storage, generator and pipe-draining text.
 
 ## Disclaimer
 

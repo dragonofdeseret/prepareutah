@@ -426,6 +426,7 @@
     ],
     before: [
       "Talk to your medical provider about a power-outage plan for powered devices and refrigerated medicines. [[ready-power]]",
+      "Planning for more than a few days? The <a href=\"/guides/long-outage.html\">90 days without utilities</a> guide covers heat, fuel, batteries, and when to leave.",
       "If someone relies on powered medical equipment, ask Rocky Mountain Power about its Medical Certificate program (a medical professional must complete the application). [[rmp-afn]]",
       "Install carbon monoxide alarms with battery backup, and test smoke alarms. [[ready-winter]]",
       "Keep flashlights for every household member, plus power banks and a battery or hand-crank radio. [[ready-power]] [[ready-kit]]",
@@ -575,13 +576,14 @@
     ],
     before: [
       "Store at least 1 gallon of water per person per day, starting with a 14-day supply. [[dem-water-guide]]",
+      "Preparing for an outage that lasts months? The <a href=\"/guides/long-outage.html\">90 days without utilities</a> guide covers storing and treating water at that scale.",
       "Strap your water heater: the tank holds clean water you can use in an outage. [[dem-water-guide]] [[fema-food-water]]",
       "Look up which water system serves your address, and know where it posts notices. [[deq-search]] [[deq-emergencies]]",
       "Build an emergency toilet: two buckets, heavy-duty bags, and kitty litter. [[br-sanitation]]",
       "Keep plain unscented bleach, hand sanitizer with at least 60% alcohol, moist towelettes, garbage bags, and ties. [[br-sanitation]] [[ready-kit]]"
     ],
     during: [
-      "<strong>Boil water advisory:</strong> bring water to a full rolling boil for 1 minute (3 minutes above 6,500 feet) and let it cool. Use boiled or bottled water for drinking, cooking, brushing teeth, ice, pets, and baby formula. If your water system's notice says to boil longer, follow it. [[cdc-advisories]] [[cdc-boil]] [[deq-boil-faq]]",
+      "<strong>Boil water advisory:</strong> bring water to a full rolling boil for 1 minute (3 minutes above 5,000 feet) and let it cool. Use boiled or bottled water for drinking, cooking, brushing teeth, ice, pets, and baby formula. If your water system's notice says to boil longer, follow it. [[epa-disinfect]] [[cdc-advisories]] [[deq-boil-faq]]",
       "<strong>Do-not-drink order:</strong> boiling won't help, because the problem may be chemicals. Use bottled water for drinking and cooking. <strong>Do-not-use orders</strong> are rare: use bottled water for everything. [[cdc-advisories]]",
       "Dishes: a dishwasher with a sanitizing cycle is generally fine. To hand-wash, soak dishes for 1 minute in 1 teaspoon of unscented bleach per gallon of warm water. [[cdc-advisories]]",
       "Can't boil? Utah DEQ allows 1/8 teaspoon of plain household bleach per gallon; let it stand 30 minutes. [[deq-boil-faq]] [[ready-water]]",

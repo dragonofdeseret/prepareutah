@@ -468,7 +468,7 @@ emit("es/index.html", {
   <h3>Terremotos</h3>
   ${esLi(["Agáchese, cúbrase y agárrese hasta que deje de temblar. [[ready-es-terremotos]]", "La guía de Utah sobre terremotos, “Echando raíces en tierra de terremotos”, está en español. [[ugs-roots-es]]"])}
   <h3>Agua</h3>
-  ${esLi(["Si su sistema de agua ordena hervirla, hiérvala a borbotones durante 1 minuto (3 minutos a más de 6,500 pies) antes de tomarla, cocinar o lavarse los dientes. Si la orden dice que no la tome, hervirla no sirve: use agua embotellada. [[cdc-water-es]]"])}
+  ${esLi(["Si su sistema de agua ordena hervirla, hiérvala a borbotones durante 1 minuto (3 minutos a más de 5,000 pies) antes de tomarla, cocinar o lavarse los dientes. Si la orden dice que no la tome, hervirla no sirve: use agua embotellada. [[cdc-water-es]] [[epa-disinfect]]"])}
   <h3>Humo de incendios forestales</h3>
   ${esLi(["Consulte la calidad del aire en AirNow en español y siga los consejos de la EPA para protegerse del humo. [[airnow-es]] [[epa-humo-es]]"])}
 </div>
